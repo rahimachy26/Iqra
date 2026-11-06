@@ -30,6 +30,12 @@ A private 30-day self-review (muhasaba). Each day: the five prayers (on time / l
 ## Ramadan 30-day check · রমজানের ৩০ দিন
 Opens on the first day of Ramadan: today's fast (fasted / excused / missed, with make-up days counted), five prayers, sehri, Taraweeh, Quran khatm progress (paras), iftar dua, charity or feeding someone iftar, guarding the tongue, and in the last ten nights, night prayer and the Laylatul Qadr dua, with odd nights marked 🌙. Fitrana reminder from day 25. You can shift the start by a day to match moon sighting in your country.
 
+## Listen with word highlighting · তিলাওয়াত
+Tap **▶ Listen** on any ayah, or **Listen with word highlighting** at the top of a surah or para. Recitation by Mishary Rashid Alafasy. Each Arabic word lights up as it is recited, which is a big help for dyslexic and beginner readers. There's a player bar with previous/next, speed (0.75× / 1× / 1.25×), repeat-ayah and stop, and the page follows the recitation automatically. The Bismillah plays before each new surah.
+
+## Qibla direction · কিবলার দিক
+The Prayer tab → **Qibla direction**. Shows the exact angle from North and the distance to Makkah for your city or current location, plus a live compass (iPhone and Android) that tells you to turn left or right and turns green when you face the Qibla.
+
 ## Reminders
 Add alerts for the five daily prayers, sehri and iftar in Ramadan, and a weekly Friday reminder to read Surah Al-Kahf. They go into your iPhone Calendar, so they ring even when the app is closed.
 
@@ -50,6 +56,8 @@ Open the app link in Safari on your iPhone, tap **Share**, then **Add to Home Sc
 ## Sources
 - Quran text (Uthmani) and Bangla translation: [Al-Quran Cloud API](https://alquran.cloud/api)
 - Sahih al-Bukhari (Arabic, English by Muhsin Khan, Bangla): [Hadith API by Fawaz Ahmed](https://github.com/fawazahmed0/hadith-api)
+- Recitation audio: Mishary Rashid Alafasy, streamed from the [Islamic Network CDN](https://alquran.cloud/cdn) (EveryAyah.com recordings)
+- Word timings: [quran-align](https://github.com/cpfair/quran-align) © 2016 Collin Fair, licensed [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Split into one file per surah in `audio/alafasy/` (see the LICENSE file there); provided without warranty
 - Prayer times are calculated on the device (based on the PrayTimes.org method). Times may differ by a few minutes from your local mosque's timetable.
 
 May Allah make it a source of benefit for all who use it. 🤲

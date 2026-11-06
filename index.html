@@ -69,7 +69,7 @@ h2{font-size:1.1em;margin:22px 0 10px}
 .bism{font-family:var(--ar-font);font-size:calc(1.6em * var(--ar-mult,1));text-align:center;direction:rtl;margin:6px 0 18px;line-height:2}
 .verse{background:var(--card);border:2px solid var(--line);border-radius:18px;padding:14px 16px;margin-bottom:12px;scroll-margin-top:calc(90px + var(--safe-top));transition:opacity .2s}
 .verse .ref{display:inline-flex;align-items:center;justify-content:center;min-width:2.6em;padding:2px 10px;border-radius:999px;background:var(--accent-soft);color:var(--accent);font-weight:600;font-size:.8em}
-.verse .ar{font-family:var(--ar-font);direction:rtl;text-align:right;font-size:calc(1.75em * var(--ar-mult,1));line-height:2.1;margin:10px 0 6px;letter-spacing:0;word-spacing:normal}
+.verse .ar{clear:both;font-family:var(--ar-font);direction:rtl;text-align:right;font-size:calc(1.75em * var(--ar-mult,1));line-height:2.1;margin:10px 0 6px;letter-spacing:0;word-spacing:normal}
 .verse .tr{font-family:var(--bn-font);line-height:var(--lh);font-size:1.05em;text-align:left;margin-top:6px}
 .verse .sajda{font-size:.75em;color:var(--accent);margin-left:8px}
 .focus-on .verse{opacity:.28}
@@ -189,6 +189,31 @@ textarea{width:100%;border:2px solid var(--line);border-radius:14px;background:v
 .mhstats div{background:var(--accent-soft);border-radius:14px;padding:12px;text-align:center}
 .mhstats b{display:block;font-size:1.6em;color:var(--accent)}
 .mhstats span{font-size:.85em}
+/* audio player */
+.listenall{width:100%;margin-bottom:14px;line-height:1.3}
+.listenall small{font-weight:400;opacity:.9}
+.verse .w{border-radius:8px;padding:0 2px;transition:background .12s}
+.verse .w.hl{background:#FFD95A;color:#1B1B1B;box-shadow:0 0 0 3px #FFD95A}
+.verse.playing{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.bism.playing{background:var(--hl);border-radius:14px}
+.sharebtn + .sharebtn{margin-right:6px}
+#apbar{position:fixed;left:8px;right:8px;bottom:calc(80px + var(--safe-bot));z-index:40;background:var(--accent);color:#fff;border-radius:18px;padding:8px 10px;box-shadow:0 8px 24px rgba(0,0,0,.25);max-width:744px;margin:0 auto}
+#apbar.hidden{display:none}
+.apinfo{font-size:.8em;text-align:center;margin-bottom:4px;opacity:.95;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.aprow{display:flex;justify-content:space-between;gap:4px}
+.apb{flex:1;min-height:46px;border:0;border-radius:12px;background:rgba(255,255,255,.14);color:#fff;font-size:1.15em}
+.apb.apmain{background:#fff;color:var(--accent);font-size:1.3em}
+.apb.aptxt{font-size:.95em;font-weight:600}
+.apb.on{background:#FFD95A;color:#1B1B1B}
+body.ap-open main{padding-bottom:calc(200px + var(--safe-bot))}
+body.ap-open .focusbar{bottom:calc(170px + var(--safe-bot))}
+/* qibla */
+.qwrap{text-align:center;margin:6px 0 14px}
+.qdial{width:min(84vw,330px);height:auto;color:var(--fg)}
+#qRot{transition:transform .15s linear}
+.qstatus{font-weight:600;margin-bottom:8px;padding:10px;border-radius:14px;background:var(--accent-soft)}
+.qstatus.ok{background:#2C7A4B;color:#fff}
+.qbig{font-size:2.4em;font-weight:700;color:var(--accent)}
 /* brand */
 .brandcard{display:flex;align-items:center;gap:16px;background:var(--accent-soft);margin-bottom:10px}
 .sharehome{width:100%;display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:14px}
@@ -685,7 +710,7 @@ function selectTab(tab) {
 }
 function go(view, arg) {
   if (state.observer) { state.observer.disconnect(); state.observer = null; }
-  state.view = view; state.focus = false; $('#favBtn').classList.add('hidden');
+  state.view = view; state.focus = false; $('#favBtn').classList.add('hidden'); apStop(); stopCompass();
   $('#focusbar').classList.add('hidden');
   $('#view').classList.remove('focus-on');
   applySettings();
@@ -699,6 +724,7 @@ function go(view, arg) {
   if (view === 'ramadan') { selectTab('ramadan'); renderRamadan(); }
   if (view === 'tracker') renderTracker(arg || {});
   if (view === 'rtracker') renderRTracker(arg || {});
+  if (view === 'qibla') renderQibla(arg || {});
   const hash = view === 'reader' ? (arg.surah ? 'surah-' + arg.surah : 'para-' + arg.juz) : view === 'book' ? 'bukhari-' + arg.n : view;
   try { history.replaceState(null, '', '#' + hash); } catch (e) {}
 }
@@ -833,7 +859,7 @@ async function renderReader({ juz, surah, id, s: jumpS, a: jumpA }) {
   }
   if (state.view !== 'reader' || (surah ? state.surah !== surah : state.juz !== juz)) return;
   state.data = data;
-  let h = '', first = true;
+  let h = `<button class="btn listenall" id="playAll">▶ Listen with word highlighting · <span class="bn">তিলাওয়াত শুনুন</span><br><small>Mishary Rashid Alafasy</small></button>`, first = true;
   for (const v of data.verses) {
     if (v.a === 1 || first) {
       const s = data.surahs[v.s] || {};
@@ -844,8 +870,8 @@ async function renderReader({ juz, surah, id, s: jumpS, a: jumpA }) {
     const [bism, rest] = splitBism(v);
     if (bism && S.showAr) h += `<div class="bism" lang="ar">${esc(bism)}</div>`;
     h += `<article class="verse" id="v${v.id}" data-id="${v.id}" data-s="${v.s}" data-a="${v.a}">
-      ${shareBtn()}<span class="ref">${v.s}:${v.a}</span>${v.sajda ? '<span class="sajda">۩ Sajdah · সিজদা</span>' : ''}
-      ${S.showAr ? `<div class="ar" lang="ar">${esc(rest)}</div>` : ''}
+      ${shareBtn()}<button class="sharebtn" data-play aria-label="Listen to this ayah">▶<span>Listen</span></button><span class="ref">${v.s}:${v.a}</span>${v.sajda ? '<span class="sajda">۩ Sajdah · সিজদা</span>' : ''}
+      ${S.showAr ? `<div class="ar" lang="ar">${arWordsHTML(rest).html}</div>` : ''}
       ${S.showBn ? `<div class="tr" lang="bn">${esc(v.bn)}</div>` : ''}
     </article>`;
   }
@@ -856,6 +882,8 @@ async function renderReader({ juz, surah, id, s: jumpS, a: jumpA }) {
   if ($('#prevJ')) $('#prevJ').onclick = () => go('reader', surah ? { surah: surah - 1 } : { juz: juz - 1 });
   if ($('#nextJ')) $('#nextJ').onclick = () => go('reader', surah ? { surah: surah + 1 } : { juz: juz + 1 });
   $('#view').querySelectorAll('.verse').forEach((el, i) => el.onclick = () => { if (state.focus) setFocus(i); });
+  $('#view').querySelectorAll('[data-play]').forEach(b => b.onclick = ev => { ev.stopPropagation(); apStart(b.closest('.verse')); });
+  $('#playAll').onclick = () => { const f = $('#view .verse[data-id]'); if (f) apStart(f); };
   const target = jumpS ? $(`#view .verse[data-s="${jumpS}"][data-a="${jumpA}"]`) : (id && document.getElementById('v' + id));
   if (target) { target.scrollIntoView(); if (jumpS) { target.style.borderColor = 'var(--accent)'; target.style.background = 'var(--hl)'; } }
   // remember position
@@ -984,6 +1012,7 @@ function renderPrayer() {
   <ul class="ptimes">${PRAYERS.map(([k, en, bn]) => `<li class="${k === 'sunrise' ? 'sun' : ''} ${nextToday && k === nextKey ? 'is-next' : ''}">
     <span class="nm"><b>${en}</b> · <span class="bn">${bn}</span>${k === 'sunrise' ? '<small>End of Fajr time · ফজরের শেষ সময়</small>' : ''}</span><span class="t">${fmt(times[k], tz)}</span></li>`).join('')}</ul>
   <button class="btn ghost" data-share="prayer" style="width:100%;margin-bottom:6px">${SHARE_ICON.replace('<svg', '<svg width="20" height="20" style="vertical-align:-4px"')} Share today's times · <span class="bn">আজকের সময় শেয়ার করুন</span></button>
+  <button class="card continue mhentry" data-go-qibla><span><b>🧭 Qibla direction · <span class="bn">কিবলার দিক</span></b><br><span class="muted">${Math.round(qiblaBearing(place.lat, place.lng))}° from North · live compass</span></span><span style="font-size:1.6em">›</span></button>
   ${mhEntry()}
   <h2>Next 7 days · <span class="bn">আগামী ৭ দিন</span></h2>
   <div class="weekwrap"><table class="week"><tr><th></th><th>Fajr</th><th>Sunrise</th><th>Dhuhr</th><th>Asr</th><th>Maghrib</th><th>Isha</th></tr>
@@ -1004,6 +1033,7 @@ function renderPrayer() {
   wireReminders(place, o);
   $('#chg').onclick = openPlacePicker;
   $('#view').querySelector('[data-go-tracker]').onclick = () => go('tracker');
+  $('#view').querySelector('[data-go-qibla]').onclick = () => go('qibla');
   $('#mth').onchange = e => { S.method = e.target.value === place.method ? null : e.target.value; save(); renderPrayer(); };
   $('#hl').onchange = e => { S.highLat = e.target.value; save(); renderPrayer(); };
   $('#asrSeg').querySelectorAll('button').forEach(b => b.onclick = () => { S.asr = b.dataset.v === place.asr ? null : b.dataset.v; save(); renderPrayer(); });
@@ -1070,7 +1100,7 @@ async function renderSettings() {
   <div class="card"><p style="margin-top:0">Send the Iqra app to family and friends.<br><span class="bn">পরিবার ও বন্ধুদের সাথে অ্যাপটি শেয়ার করুন।</span></p><button class="btn" data-share="app" style="width:100%">Share the app · <span class="bn">অ্যাপ শেয়ার করুন</span></button></div>
   <h2>Add to iPhone home screen</h2>
   <div class="card note">In Safari, tap the Share button, then <b>Add to Home Screen</b>. The app then opens full screen with its own icon.<br><span class="bn">Safari-তে Share বোতাম চাপুন, তারপর “Add to Home Screen” বেছে নিন।</span></div>
-  <div class="card note">Arabic text: Uthmani script. Bangla translation and Arabic text are downloaded from the Al-Quran Cloud API (alquran.cloud). Prayer times are calculated on your device. Surah benefits use only authentic narrations (Bukhari, Muslim, or graded sahih/hasan), with references linked to sunnah.com. Sahih al-Bukhari (Arabic, English by Muhsin Khan, and Bangla) is downloaded from the open Hadith API by Fawaz Ahmed (github.com/fawazahmed0/hadith-api).</div>`;
+  <div class="card note">Arabic text: Uthmani script. Bangla translation and Arabic text are downloaded from the Al-Quran Cloud API (alquran.cloud). Recitation: Mishary Rashid Alafasy, streamed from the Islamic Network CDN (cdn.islamic.network; EveryAyah.com recordings). Word timings: quran-align, © 2016 Collin Fair, CC BY 4.0 (creativecommons.org/licenses/by/4.0), github.com/cpfair/quran-align, split into one file per surah, provided without warranty. Prayer times are calculated on your device. Surah benefits use only authentic narrations (Bukhari, Muslim, or graded sahih/hasan), with references linked to sunnah.com. Sahih al-Bukhari (Arabic, English by Muhsin Khan, and Bangla) is downloaded from the open Hadith API by Fawaz Ahmed (github.com/fawazahmed0/hadith-api).</div>`;
   wireDisplay($('#view'));
   $('#dlAll').onclick = async () => {
     const btn = $('#dlAll'); btn.disabled = true;
@@ -1477,6 +1507,208 @@ function wireRmRem(startKey, len) {
   };
 }
 
+/* ---------- Audio recitation with word-by-word highlighting ----------
+   Audio: Mishary Rashid Alafasy via cdn.islamic.network (EveryAyah files).
+   Word timings: quran-align by Collin Fair (CC BY 4.0), stored in audio/alafasy/{surah}.json */
+const AUDIO_BASE = 'https://cdn.islamic.network/quran/audio/128/ar.alafasy/';
+const isMarkTok = t => /^[ۖ-ۭؐ-ؚ۝۞۩\s]+$/.test(t);
+function arWordsHTML(text) {
+  // wrap each real word in a span; standalone pause/hizb marks stay with the previous word
+  const toks = text.split(/\s+/).filter(Boolean);
+  let out = [], n = 0;
+  for (const t of toks) {
+    if (isMarkTok(t) && out.length) { out[out.length - 1] = out[out.length - 1].replace(/<\/span>$/, ` ${esc(t)}</span>`); continue; }
+    if (isMarkTok(t)) { out.push(`<span>${esc(t)}</span>`); continue; }
+    out.push(`<span class="w" data-w="${n++}">${esc(t)}</span>`);
+  }
+  return { html: out.join(' '), count: n };
+}
+const AP = { audio: null, list: [], idx: -1, timings: {}, speed: 1, repeat: false, follow: true, raf: 0, bism: false };
+async function apTimings(s) {
+  if (AP.timings[s]) return AP.timings[s];
+  try { const r = await fetch('audio/alafasy/' + s + '.json'); if (!r.ok) throw 0; AP.timings[s] = await r.json(); } catch (e) { AP.timings[s] = null; }
+  return AP.timings[s];
+}
+function apBar() {
+  let bar = $('#apbar');
+  if (!bar) {
+    bar = document.createElement('div'); bar.id = 'apbar';
+    bar.innerHTML = `<div class="apinfo" id="apInfo">—</div>
+      <div class="aprow">
+        <button class="apb" id="apPrev" aria-label="Previous ayah">⏮</button>
+        <button class="apb apmain" id="apPlay" aria-label="Play or pause">⏸</button>
+        <button class="apb" id="apNext" aria-label="Next ayah">⏭</button>
+        <button class="apb aptxt" id="apSpeed" aria-label="Speed">1×</button>
+        <button class="apb" id="apRep" aria-label="Repeat ayah" title="Repeat this ayah">🔁</button>
+        <button class="apb" id="apClose" aria-label="Stop and close">✕</button>
+      </div>`;
+    document.body.appendChild(bar);
+    $('#apPlay').onclick = () => { if (!AP.audio) return; AP.audio.paused ? AP.audio.play().catch(() => {}) : AP.audio.pause(); };
+    $('#apPrev').onclick = () => apGo(AP.idx - 1);
+    $('#apNext').onclick = () => apGo(AP.idx + 1);
+    $('#apSpeed').onclick = () => { const sp = [0.75, 1, 1.25]; AP.speed = sp[(sp.indexOf(AP.speed) + 1) % sp.length]; $('#apSpeed').textContent = AP.speed + '×'; if (AP.audio) AP.audio.playbackRate = AP.speed; store.set('apSpeed', AP.speed); };
+    $('#apRep').onclick = () => { AP.repeat = !AP.repeat; $('#apRep').classList.toggle('on', AP.repeat); toast(AP.repeat ? 'Repeating this ayah · এই আয়াত বারবার' : 'Repeat off'); };
+    $('#apClose').onclick = apStop;
+  }
+  bar.classList.remove('hidden');
+  document.body.classList.add('ap-open');
+  AP.speed = store.get('apSpeed', 1); $('#apSpeed').textContent = AP.speed + '×';
+  return bar;
+}
+function apClearHL() { document.querySelectorAll('.w.hl').forEach(x => x.classList.remove('hl')); document.querySelectorAll('.verse.playing,.bism.playing').forEach(x => x.classList.remove('playing')); }
+function apStop() { if (AP.audio) { AP.audio.pause(); AP.audio.src = ''; } clearInterval(AP.raf); apClearHL(); AP.idx = -1; const b = $('#apbar'); if (b) b.classList.add('hidden'); document.body.classList.remove('ap-open'); }
+function apStart(el) {
+  const vs = [...$('#view').querySelectorAll('.verse[data-id]')];
+  AP.list = vs.map(v => ({ id: +v.dataset.id, s: +v.dataset.s, a: +v.dataset.a }));
+  apBar();
+  apGo(Math.max(0, vs.indexOf(el)), true);
+}
+async function apGo(i, withBism) {
+  if (i < 0 || i >= AP.list.length) { if (i >= AP.list.length) { apStop(); toast('Finished · শেষ হয়েছে'); } return; }
+  AP.idx = i;
+  const it = AP.list[i];
+  const el = $(`#view .verse[data-id="${it.id}"]`);
+  if (!el) { apStop(); return; }
+  if (!AP.audio) {
+    AP.audio = new Audio(); AP.audio.preload = 'auto';
+    AP.audio.addEventListener('ended', () => {
+      if (AP.bism) { AP.bism = false; apPlayAyah(); return; }
+      if (AP.repeat) { AP.audio.currentTime = 0; AP.audio.play().catch(() => {}); return; }
+      apGo(AP.idx + 1, true);
+    });
+    AP.audio.addEventListener('play', () => { const p = $('#apPlay'); if (p) p.textContent = '⏸'; apTick(); });
+    AP.audio.addEventListener('pause', () => { const p = $('#apPlay'); if (p) p.textContent = '▶'; });
+    AP.audio.addEventListener('error', () => { if (AP.idx >= 0) toast('Could not play audio — check your internet · ইন্টারনেট দেখুন'); });
+  }
+  apClearHL();
+  const sm = SURAHS[it.s - 1];
+  $('#apInfo').innerHTML = `${esc(sm.en)} ${it.s}:${it.a} · <span class="bn">${esc(sm.bn)}</span> · Mishary Alafasy`;
+  await apTimings(it.s);
+  if (AP.idx !== i) return;
+  // play the Bismillah first when a new surah starts (not for Al-Fatihah or At-Tawbah)
+  const bismEl = el.previousElementSibling && el.previousElementSibling.classList.contains('bism') ? el.previousElementSibling : null;
+  if (withBism && it.a === 1 && it.s !== 1 && it.s !== 9 && bismEl) {
+    AP.bism = true; bismEl.classList.add('playing'); apScroll(bismEl);
+    AP.audio.src = AUDIO_BASE + '1.mp3'; AP.audio.playbackRate = AP.speed; AP.audio.play().catch(() => {});
+    if ('mediaSession' in navigator) try { navigator.mediaSession.metadata = new MediaMetadata({ title: `${sm.en} — Bismillah`, artist: 'Mishary Alafasy', album: 'Iqra' }); } catch (e) {}
+    return;
+  }
+  AP.bism = false;
+  apPlayAyah();
+}
+function apPlayAyah() {
+  const it = AP.list[AP.idx]; if (!it) return;
+  apClearHL();
+  const el = $(`#view .verse[data-id="${it.id}"]`); if (!el) return;
+  el.classList.add('playing'); apScroll(el);
+  AP.audio.src = AUDIO_BASE + it.id + '.mp3';
+  AP.audio.playbackRate = AP.speed;
+  AP.audio.play().catch(() => { const p = $('#apPlay'); if (p) p.textContent = '▶'; });
+  const sm = SURAHS[it.s - 1];
+  if ('mediaSession' in navigator) try {
+    navigator.mediaSession.metadata = new MediaMetadata({ title: `${sm.en} ${it.s}:${it.a}`, artist: 'Mishary Alafasy', album: 'Iqra' });
+    navigator.mediaSession.setActionHandler('nexttrack', () => apGo(AP.idx + 1, true));
+    navigator.mediaSession.setActionHandler('previoustrack', () => apGo(AP.idx - 1));
+  } catch (e) {}
+}
+function apScroll(el) { if (AP.follow && el) el.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+function apTick() {
+  clearInterval(AP.raf);
+  const step = () => {
+    if (!AP.audio || AP.audio.paused || AP.bism || AP.idx < 0) return;
+    const it = AP.list[AP.idx]; const tm = AP.timings[it.s];
+    const el = $(`#view .verse[data-id="${it.id}"]`);
+    if (!tm || !el) return;
+    const segs = tm[it.a - 1] || [];
+    const words = el.querySelectorAll('.w');
+    const expected = segs.reduce((m, sg) => Math.max(m, sg[1]), 0);
+    if (words.length !== expected || !expected) return;   // only highlight words when the text and timings line up exactly
+    const ms = AP.audio.currentTime * 1000;
+    let on = null;
+    for (const sg of segs) if (ms >= sg[2] && ms < sg[3] + 120) on = sg;
+    words.forEach((w, k) => w.classList.toggle('hl', !!on && k >= on[0] && k < on[1]));
+  };
+  AP.raf = setInterval(step, 60);
+}
+
+/* ---------- Qibla direction ---------- */
+const KAABA = { lat: 21.422487, lng: 39.826206 };
+function qiblaBearing(lat, lng) {
+  const r = Math.PI / 180, p1 = lat * r, p2 = KAABA.lat * r, dl = (KAABA.lng - lng) * r;
+  const y = Math.sin(dl) * Math.cos(p2), x = Math.cos(p1) * Math.sin(p2) - Math.sin(p1) * Math.cos(p2) * Math.cos(dl);
+  return (Math.atan2(y, x) / r + 360) % 360;
+}
+function distanceKm(lat, lng) {
+  const r = Math.PI / 180, dp = (KAABA.lat - lat) * r, dl = (KAABA.lng - lng) * r;
+  const a = Math.sin(dp / 2) ** 2 + Math.cos(lat * r) * Math.cos(KAABA.lat * r) * Math.sin(dl / 2) ** 2;
+  return 6371 * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+const compassWord = d => ['North', 'North-east', 'East', 'South-east', 'South', 'South-west', 'West', 'North-west'][Math.round(d / 45) % 8];
+const compassBn = d => ['উত্তর', 'উত্তর-পূর্ব', 'পূর্ব', 'দক্ষিণ-পূর্ব', 'দক্ষিণ', 'দক্ষিণ-পশ্চিম', 'পশ্চিম', 'উত্তর-পশ্চিম'][Math.round(d / 45) % 8];
+let qiblaHandler = null;
+function stopCompass() { if (qiblaHandler) { window.removeEventListener('deviceorientationabsolute', qiblaHandler, true); window.removeEventListener('deviceorientation', qiblaHandler, true); qiblaHandler = null; } }
+function renderQibla(arg = {}) {
+  setTop({ title: 'Qibla · <span class="bn">কিবলার দিক</span>', sub: 'কাবা শরিফের দিক', back: true });
+  selectTab('prayer');
+  stopCompass();
+  const place = arg.here || currentPlace();
+  const b = qiblaBearing(place.lat, place.lng), km = Math.round(distanceKm(place.lat, place.lng));
+  const ticks = [...Array(72)].map((_, i) => `<line x1="150" y1="${i % 18 === 0 ? 18 : i % 2 ? 26 : 22}" x2="150" y2="34" transform="rotate(${i * 5} 150 150)" stroke="currentColor" stroke-width="${i % 18 === 0 ? 3 : 1.5}" opacity="${i % 2 ? .45 : .8}"/>`).join('');
+  $('#view').innerHTML = `
+    <div class="card loc"><div><div class="place">${esc(place.city)}</div><div class="muted">${esc(place.country)}</div></div><button class="btn ghost" id="qHere">📍 Use my location</button></div>
+    <div class="qwrap"><div class="qstatus" id="qStatus">Turn until the 🕋 is at the top · <span class="bn">🕋 উপরে না আসা পর্যন্ত ঘুরুন</span></div>
+      <svg id="qDial" viewBox="0 0 300 300" class="qdial"><g id="qRot">
+        <circle cx="150" cy="150" r="140" fill="var(--card)" stroke="var(--line)" stroke-width="4"/>
+        ${ticks}
+        <text x="150" y="58" text-anchor="middle" font-size="22" font-weight="700" fill="#B5483B">N</text>
+        <text x="250" y="158" text-anchor="middle" font-size="18" fill="currentColor">E</text>
+        <text x="150" y="258" text-anchor="middle" font-size="18" fill="currentColor">S</text>
+        <text x="50" y="158" text-anchor="middle" font-size="18" fill="currentColor">W</text>
+        <g transform="rotate(${b.toFixed(1)} 150 150)"><line x1="150" y1="150" x2="150" y2="62" stroke="var(--accent)" stroke-width="8" stroke-linecap="round"/><text x="150" y="52" text-anchor="middle" font-size="30">🕋</text></g>
+        <circle cx="150" cy="150" r="10" fill="var(--accent)"/>
+      </g><polygon points="150,2 140,20 160,20" fill="var(--fg)"/></svg></div>
+    <div class="card" style="text-align:center"><div class="qbig">${Math.round(b)}°</div><div>from North, towards the <b>${compassWord(b)}</b> · <span class="bn">উত্তর থেকে ${bnNum(Math.round(b))}°, ${compassBn(b)} দিকে</span></div><div class="muted" style="margin-top:6px">Makkah is about ${km.toLocaleString('en-GB')} km away · <span class="bn">মক্কা প্রায় ${bnNum(km.toLocaleString('en-GB'))} কিমি দূরে</span></div></div>
+    <button class="btn" id="qStart" style="width:100%">🧭 Start live compass · <span class="bn">কম্পাস চালু করুন</span></button>
+    <p class="note" id="qMsg"></p>
+    <div class="card note">Hold your phone flat, away from metal and magnets. If the compass seems wrong, move the phone in a figure-of-8 to calibrate it. Without the live compass, use the angle above with any compass: ${Math.round(b)}° clockwise from North.<br><span class="bn">ফোন সমতলভাবে ধরুন, ধাতু ও চুম্বক থেকে দূরে রাখুন। ভুল মনে হলে ফোনটি ৮-এর মতো করে ঘোরান।</span></div>`;
+  $('#qHere').onclick = () => {
+    const msg = $('#qMsg');
+    if (!navigator.geolocation) { msg.textContent = 'Location is not available on this device.'; return; }
+    msg.textContent = 'Finding your location…';
+    navigator.geolocation.getCurrentPosition(pos => renderQibla({ here: { city: 'My location', country: `${pos.coords.latitude.toFixed(3)}, ${pos.coords.longitude.toFixed(3)}`, lat: pos.coords.latitude, lng: pos.coords.longitude } }),
+      () => { msg.textContent = 'Could not get your location. Allow location for this site, or choose a city on the Prayer tab.'; }, { timeout: 15000 });
+  };
+  $('#qStart').onclick = async () => {
+    const msg = $('#qMsg');
+    try {
+      if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+        const p = await DeviceOrientationEvent.requestPermission();
+        if (p !== 'granted') { msg.textContent = 'Motion & orientation access was not allowed. On iPhone: Settings → Safari → Motion & Orientation Access.'; return; }
+      }
+    } catch (e) { msg.textContent = 'Could not start the compass on this device.'; return; }
+    let got = false;
+    qiblaHandler = ev => {
+      let heading = null;
+      if (typeof ev.webkitCompassHeading === 'number') heading = ev.webkitCompassHeading;
+      else if (ev.absolute && typeof ev.alpha === 'number') heading = (360 - ev.alpha) % 360;
+      if (heading == null) return;
+      got = true;
+      const rot = $('#qRot'); if (!rot) { stopCompass(); return; }
+      rot.setAttribute('transform', `rotate(${(-heading).toFixed(1)} 150 150)`);
+      const diff = ((b - heading + 540) % 360) - 180;
+      const ok = Math.abs(diff) <= 5;
+      const st = $('#qStatus');
+      st.classList.toggle('ok', ok);
+      st.innerHTML = ok ? '✅ You are facing the Qibla · <span class="bn">আপনি কিবলামুখী</span>' : (diff > 0 ? `Turn right ${Math.round(diff)}° ↻ · <span class="bn">ডানে ঘুরুন</span>` : `Turn left ${Math.round(-diff)}° ↺ · <span class="bn">বামে ঘুরুন</span>`);
+      if (ok && navigator.vibrate && !st.dataset.buzzed) { navigator.vibrate(60); st.dataset.buzzed = '1'; } else if (!ok) st.dataset.buzzed = '';
+    };
+    window.addEventListener('deviceorientationabsolute', qiblaHandler, true);
+    window.addEventListener('deviceorientation', qiblaHandler, true);
+    $('#qStart').classList.add('hidden');
+    setTimeout(() => { if (!got) msg.textContent = 'No compass found on this device (computers usually have none). Use the angle shown above with a compass.'; }, 3000);
+  };
+}
+
 /* ---------- Hadith: Sahih al-Bukhari (open Hadith API by Fawaz Ahmed) ---------- */
 const HAPI = 'https://cdn.jsdelivr.net/gh/fawazahmed0/hadith-api@1/editions/';
 // Fallback labels for the 97 books; the title stored in the hadith data is shown once a book has loaded.
@@ -1769,7 +2001,7 @@ function renderRamadan() {
 
 /* ---------- wiring ---------- */
 document.querySelectorAll('#tabs button').forEach(b => b.onclick = () => go(b.dataset.tab));
-$('#backBtn').onclick = () => go(state.view === 'book' ? 'hadith' : state.view === 'rtracker' ? 'ramadan' : 'quran');
+$('#backBtn').onclick = () => go(state.view === 'book' ? 'hadith' : state.view === 'rtracker' ? 'ramadan' : state.view === 'qibla' ? 'prayer' : 'quran');
 $('#focusBtn').onclick = toggleFocus;
 $('#prevV').onclick = () => setFocus(state.focusIdx - 1);
 $('#nextV').onclick = () => setFocus(state.focusIdx + 1);
@@ -1791,7 +2023,7 @@ applySettings();
   if (m && +m[1] >= 1 && +m[1] <= 30) go('reader', { juz: +m[1] });
   else if (/^surah-\d+$/.test(h) && +h.split('-')[1] >= 1 && +h.split('-')[1] <= 114) go('reader', { surah: +h.split('-')[1] });
   else if (/^bukhari-\d+$/.test(h)) go('book', { n: +h.split('-')[1] });
-  else if (['prayer', 'settings', 'hadith', 'ramadan', 'tracker', 'rtracker'].includes(h)) go(h);
+  else if (['prayer', 'settings', 'hadith', 'ramadan', 'tracker', 'rtracker', 'qibla'].includes(h)) go(h);
   else go('quran');
 })();
 if ('serviceWorker' in navigator && location.protocol.startsWith('http')) navigator.serviceWorker.register('sw.js').catch(() => {});
