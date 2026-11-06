@@ -157,6 +157,37 @@ tr.today td{background:var(--accent-soft)}
 .zno{font-size:1em;color:var(--muted)}
 .ritem p{margin:0 0 8px;line-height:var(--lh)}
 .benefitdua{border-color:var(--accent);background:var(--hl)}
+/* daily check */
+.mhentry{border-color:var(--accent);background:var(--hl)}
+.mhnav{display:flex;align-items:center;justify-content:space-between;gap:10px;text-align:center;margin:4px 0 14px}
+.mhnav .iconbtn{font-size:1.5em}
+.mhnav .iconbtn:disabled{opacity:.3}
+.mhp{margin-bottom:14px}
+.mhpn{margin-bottom:6px}
+.mhseg button{font-size:.8em;line-height:1.3;min-height:54px}
+.mhseg button.on.on{background:#2C7A4B;color:#fff}
+.mhseg button.on.late{background:#C98A1B;color:#fff}
+.mhseg button.on.miss{background:#B5483B;color:#fff}
+.stepper{display:flex;gap:10px;align-items:center}
+.stepper input{text-align:center;font-size:1.3em;font-weight:600}
+.stepper .iconbtn{font-size:1.5em;min-width:56px}
+.mhcheck{display:flex;align-items:center;gap:14px;width:100%;text-align:left;border:2px solid var(--line);background:var(--card);border-radius:14px;padding:10px 12px;margin-bottom:8px;min-height:58px}
+.mhcheck.on{border-color:var(--accent);background:var(--accent-soft)}
+.mhbox{flex:none;width:30px;height:30px;border-radius:8px;border:2px solid var(--accent);display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff}
+.mhcheck.on .mhbox{background:var(--accent)}
+textarea{width:100%;border:2px solid var(--line);border-radius:14px;background:var(--card);padding:10px 12px;font:inherit;line-height:var(--lh);resize:vertical}
+.mhscore{display:flex;justify-content:space-between;align-items:center}
+.mhscore b{font-size:1.6em;color:var(--accent)}
+.mhgrid{display:grid;grid-template-columns:repeat(6,1fr);gap:8px}
+.mhday{aspect-ratio:1;border-radius:12px;border:2px solid var(--line);background:var(--card);font-weight:600;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.1}
+.mhday small{font-size:.75em}
+.mhday:disabled{opacity:.35}
+.mhday.l1{background:#DCEFE7}.mhday.l2{background:#8CC7AE}.mhday.l3{background:#1F6F5C;color:#fff;border-color:#1F6F5C}
+.mhday.cur{outline:3px solid var(--accent);outline-offset:2px}
+.mhstats{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.mhstats div{background:var(--accent-soft);border-radius:14px;padding:12px;text-align:center}
+.mhstats b{display:block;font-size:1.6em;color:var(--accent)}
+.mhstats span{font-size:.85em}
 /* brand */
 .brandcard{display:flex;align-items:center;gap:16px;background:var(--accent-soft);margin-bottom:10px}
 .sharehome{width:100%;display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:14px}
@@ -665,6 +696,7 @@ function go(view, arg) {
   if (view === 'hadith') { selectTab('hadith'); renderBooks(); }
   if (view === 'book') { selectTab('hadith'); renderBook(arg); }
   if (view === 'ramadan') { selectTab('ramadan'); renderRamadan(); }
+  if (view === 'tracker') renderTracker(arg || {});
   const hash = view === 'reader' ? (arg.surah ? 'surah-' + arg.surah : 'para-' + arg.juz) : view === 'book' ? 'bukhari-' + arg.n : view;
   try { history.replaceState(null, '', '#' + hash); } catch (e) {}
 }
@@ -711,11 +743,16 @@ function surahRow(m) {
 function paraCard(i) {
   return `<button class="para" data-juz="${i}"><span class="num">${i} <span class="bn" style="font-size:.7em">· পারা ${bnNum(i)}</span></span><span class="nm">${esc(JUZ[i - 1])}</span><span class="dl" data-dl="${i}"></span></button>`;
 }
+function mhEntry() {
+  const mh = mhGet(); let sub = 'Prayers, Quran, hadith & one good deed — 30 days';
+  if (mh && mh.start) { const d = Math.min(30, ymdDiff(mh.start, ymdLocal()) + 1); const done = mhScore((mh.days || {})[ymdLocal()]) > 0; sub = `Day ${d} of 30 · ${done ? 'today done ✓' : 'fill in today'}`; }
+  return `<button class="card continue mhentry" data-go-tracker><span><b>📝 Daily check · <span class="bn">আত্মসমালোচনা</span></b><br><span class="muted">${sub}</span></span><span style="font-size:1.6em">›</span></button>`;
+}
 async function renderList() {
   setTop({ title: 'Quran · <span class="bn">কুরআন</span>', sub: '১১৪ সূরা · ৩০ পারা · আরবি ও বাংলা অনুবাদ' });
   const last = store.get('last', null);
   const tab = store.get('qtab', 'surah');
-  let h = `<div class="card brandcard"><img src="icon-192.png" alt="Iqra logo" width="76" height="76"><div><div class="bname">Iqra</div><div class="muted">Quran &amp; Sunnah<br><span class="bn">কুরআন ও সুন্নাহ</span></div></div></div><button class="btn sharehome" data-share="app" aria-label="Share the Iqra app">${SHARE_ICON}<span>Share Iqra · <span class="bn">অ্যাপ শেয়ার করুন</span></span></button>`;
+  let h = `<div class="card brandcard"><img src="icon-192.png" alt="Iqra logo" width="76" height="76"><div><div class="bname">Iqra</div><div class="muted">Quran &amp; Sunnah<br><span class="bn">কুরআন ও সুন্নাহ</span></div></div></div><button class="btn sharehome" data-share="app" aria-label="Share the Iqra app">${SHARE_ICON}<span>Share Iqra · <span class="bn">অ্যাপ শেয়ার করুন</span></span></button>${mhEntry()}`;
   if (last) {
     const label = last.surah ? `Surah ${last.s}. ${esc(SURAHS[last.s - 1].en)} · <span class="bn">${esc(SURAHS[last.s - 1].bn)}</span>` : `Para ${last.juz} · <span class="bn">পারা ${bnNum(last.juz)}</span>`;
     h += `<button class="card continue" id="cont"><span><b>Continue reading</b> · <span class="bn">পড়া চালিয়ে যান</span><br>${label}<br><span class="muted">Ayah ${last.s}:${last.a}</span></span><span style="font-size:1.6em">›</span></button>`;
@@ -724,6 +761,7 @@ async function renderList() {
     <div class="seg qtabs" id="qt"><button data-t="surah">Surah · <span class="bn">সূরা</span></button><button data-t="para">Para · <span class="bn">পারা</span></button><button data-t="fav">★ Favourites</button></div>
     <div id="ql"></div>`;
   $('#view').innerHTML = h;
+  $('#view').querySelector('[data-go-tracker]').onclick = () => go('tracker');
   if (last) $('#cont').onclick = () => go('reader', last.surah ? { surah: last.surah, id: last.id } : { juz: last.juz, id: last.id });
   const have = new Set(await DB.keys());
   const draw = () => {
@@ -944,6 +982,7 @@ function renderPrayer() {
   <ul class="ptimes">${PRAYERS.map(([k, en, bn]) => `<li class="${k === 'sunrise' ? 'sun' : ''} ${nextToday && k === nextKey ? 'is-next' : ''}">
     <span class="nm"><b>${en}</b> · <span class="bn">${bn}</span>${k === 'sunrise' ? '<small>End of Fajr time · ফজরের শেষ সময়</small>' : ''}</span><span class="t">${fmt(times[k], tz)}</span></li>`).join('')}</ul>
   <button class="btn ghost" data-share="prayer" style="width:100%;margin-bottom:6px">${SHARE_ICON.replace('<svg', '<svg width="20" height="20" style="vertical-align:-4px"')} Share today's times · <span class="bn">আজকের সময় শেয়ার করুন</span></button>
+  ${mhEntry()}
   <h2>Next 7 days · <span class="bn">আগামী ৭ দিন</span></h2>
   <div class="weekwrap"><table class="week"><tr><th></th><th>Fajr</th><th>Sunrise</th><th>Dhuhr</th><th>Asr</th><th>Maghrib</th><th>Isha</th></tr>
   ${week.map(({ dd, t }) => `<tr><td>${dayName(dd)}</td>${PRAYERS.map(([k]) => `<td>${fmt(t[k], tz)}</td>`).join('')}</tr>`).join('')}</table></div>
@@ -962,6 +1001,7 @@ function renderPrayer() {
   $('#view').insertAdjacentHTML('beforeend', remindersCard('prayer'));
   wireReminders(place, o);
   $('#chg').onclick = openPlacePicker;
+  $('#view').querySelector('[data-go-tracker]').onclick = () => go('tracker');
   $('#mth').onchange = e => { S.method = e.target.value === place.method ? null : e.target.value; save(); renderPrayer(); };
   $('#hl').onchange = e => { S.highLat = e.target.value; save(); renderPrayer(); };
   $('#asrSeg').querySelectorAll('button').forEach(b => b.onclick = () => { S.asr = b.dataset.v === place.asr ? null : b.dataset.v; save(); renderPrayer(); });
@@ -1193,6 +1233,121 @@ function wireReminders(place, o) {
     downloadICS('iqra-reminders.ics', ev);
     g('rMsg').innerHTML = `${ev.length} reminders ready. If nothing opens, open this app in <b>Safari</b> and try again.`;
   };
+}
+
+/* ---------- 30-day self-review (Muhasaba · আত্মসমালোচনা) — saved only on this device ---------- */
+const MH_PRAYERS = [['fajr', 'Fajr', 'ফজর', 2], ['dhuhr', 'Dhuhr', 'যোহর', 4], ['asr', 'Asr', 'আসর', 4], ['maghrib', 'Maghrib', 'মাগরিব', 3], ['isha', 'Isha', 'এশা', 4]];
+const MH_CHECKS = [
+  ['quran', '📖', 'Read Quran', 'কুরআন পড়েছি'], ['hadith', '📜', 'Read a hadith', 'হাদিস পড়েছি'],
+  ['sunnah', '🕌', 'Sunnah / nafl prayer', 'সুন্নত / নফল নামাজ'], ['adhkar', '📿', 'Morning / evening adhkar', 'সকাল-সন্ধ্যার যিকির'],
+  ['sadaqah', '🤲', 'Gave charity (any amount)', 'দান করেছি (যেকোনো পরিমাণ)'], ['family', '❤️', 'Kind to parents / family', 'বাবা-মা / পরিবারের প্রতি সদয়'],
+  ['tongue', '🤐', 'No backbiting, lying or bad words', 'গিবত, মিথ্যা বা খারাপ কথা বলিনি'],
+];
+const ymdLocal = (d = new Date()) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+const ymdAdd = (k, n) => { const [y, m, d] = k.split('-').map(Number); return ymdLocal(new Date(y, m - 1, d + n)); };
+const ymdDiff = (a, b) => { const p = k => { const [y, m, d] = k.split('-').map(Number); return Date.UTC(y, m - 1, d); }; return Math.round((p(b) - p(a)) / 864e5); };
+const mhGet = () => store.get('mh', null);
+const mhSave = mh => store.set('mh', mh);
+function mhScore(e) {
+  if (!e) return 0;
+  let s = 0;
+  for (const [k] of MH_PRAYERS) s += e.p && e.p[k] === 'on' ? 2 : e.p && e.p[k] === 'late' ? 1 : 0;
+  for (const [k] of MH_CHECKS) if (e[k]) s += k === 'quran' ? 2 : 1;
+  if (e.deed && e.deed.trim()) s += 2;
+  if (e.thanks && e.thanks.trim()) s += 1;
+  return Math.round(s / 21 * 100);
+}
+const mhLevel = pc => pc === 0 ? 0 : pc < 40 ? 1 : pc < 75 ? 2 : 3;
+
+function renderTracker(arg = {}) {
+  setTop({ title: 'Daily check · <span class="bn">আত্মসমালোচনা</span>', sub: '৩০ দিনের মুহাসাবা — প্রতিদিন নিজের হিসাব', back: true });
+  selectTab('');
+  const today = ymdLocal();
+  let mh = mhGet();
+  const motive = `<div class="card ritem benefitdua"><p>The most beloved deeds to Allah are those done regularly, even if they are small.</p><p class="bn">আল্লাহর কাছে সবচেয়ে প্রিয় আমল হলো যা নিয়মিত করা হয়, যদিও তা অল্প হয়।</p><p class="bref">📚 <a href="https://sunnah.com/bukhari:6464" target="_blank" rel="noopener">Sahih al-Bukhari 6464</a></p></div>`;
+  if (!mh || !mh.start) {
+    $('#view').innerHTML = `<div class="card rhero"><div class="big">30 days · <span class="bn">৩০ দিন</span></div><p>Each evening, take two minutes to look back at your day: your prayers, Quran, hadith and one good deed. Small steps, every day.</p><p class="bn">প্রতিদিন সন্ধ্যায় দুই মিনিট নিজের দিনের হিসাব নিন — নামাজ, কুরআন, হাদিস আর একটি ভালো কাজ। প্রতিদিন ছোট ছোট পদক্ষেপ।</p></div>${motive}
+      <button class="btn" id="mhStart" style="width:100%">Start my 30 days today · <span class="bn">আজ থেকে শুরু করি</span></button>
+      <p class="note">Your answers stay private on this phone only. · <span class="bn">আপনার উত্তর শুধু এই ফোনেই থাকে।</span></p>`;
+    $('#mhStart').onclick = () => { mhSave({ start: today, days: {} }); renderTracker(); };
+    return;
+  }
+  const end = ymdAdd(mh.start, 29);
+  let date = arg.date || (today > end ? end : today);
+  if (date < mh.start) date = mh.start;
+  if (date > today) date = today;
+  const dayNo = ymdDiff(mh.start, date) + 1;
+  const e = mh.days[date] || (mh.days[date] = { p: {} });
+  const finished = today > end;
+  const pt = (() => { try { const pl = currentPlace(); const [y, m, d] = date.split('-').map(Number); return { t: PT.forDate(y, m, d, pl, opts(pl)), tz: pl.tz }; } catch (er) { return null; } })();
+  const nice = k => { const [y, m, d] = k.split('-').map(Number); return new Date(y, m - 1, d).toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' }); };
+
+  // stats over the 30 days
+  const keys = Object.keys(mh.days).filter(k => k >= mh.start && k <= end && mhScore(mh.days[k]) > 0);
+  let onTime = 0, prayed = 0, qd = 0, hd = 0, deeds = 0;
+  keys.forEach(k => { const x = mh.days[k]; MH_PRAYERS.forEach(([p]) => { if (x.p[p] === 'on') onTime++; if (x.p[p] === 'on' || x.p[p] === 'late') prayed++; }); if (x.quran) qd++; if (x.hadith) hd++; if (x.deed && x.deed.trim()) deeds++; });
+  let streak = 0; for (let k = (mhScore(mh.days[today]) > 0 ? today : ymdAdd(today, -1)); k >= mh.start && mhScore(mh.days[k]) > 0; k = ymdAdd(k, -1)) streak++;
+
+  let h = `<div class="card rhero"><div>${finished ? 'Your 30 days are complete — MashaAllah! · <span class="bn">৩০ দিন সম্পূর্ণ — মাশাআল্লাহ!</span>' : `Day ${Math.min(dayNo, 30)} of 30 · <span class="bn">${bnNum(Math.min(dayNo, 30))}তম দিন</span>`}</div><div class="big">🔥 ${streak} day streak · <span class="bn">টানা ${bnNum(streak)} দিন</span></div></div>
+    <div class="mhnav"><button class="iconbtn" id="mhPrev" ${date <= mh.start ? 'disabled' : ''} aria-label="Previous day">‹</button><div><b>${nice(date)}</b>${date === today ? ' · Today' : ''}<br><span class="muted">Day ${dayNo}</span></div><button class="iconbtn" id="mhNext" ${date >= today || date >= end ? 'disabled' : ''} aria-label="Next day">›</button></div>
+    <div class="card"><h3 style="margin-top:0">🕌 Prayers · <span class="bn">নামাজ</span></h3>
+    ${MH_PRAYERS.map(([k, en, bn]) => `<div class="mhp"><div class="mhpn"><b>${en}</b> · <span class="bn">${bn}</span>${pt && pt.t[k] ? `<small class="muted"> ${fmt(pt.t[k], pt.tz)}</small>` : ''}</div>
+      <div class="seg mhseg" data-pr="${k}">${[['on', '✓ On time', 'সময়মতো'], ['late', '⏱ Late', 'দেরিতে'], ['miss', '✗ Missed', 'পড়িনি']].map(([v, l, b]) => `<button data-v="${v}" class="${e.p[k] === v ? 'on ' + v : ''}">${l}<br><span class="bn">${b}</span></button>`).join('')}</div></div>`).join('')}
+    <label class="f">Total rakats prayed today (fard + sunnah + nafl) · <span class="bn">আজ মোট কত রাকাত পড়েছি</span></label>
+    <div class="stepper"><button class="iconbtn" data-step="-1">−</button><input type="number" inputmode="numeric" min="0" id="mhRak" value="${e.rak != null ? e.rak : ''}" placeholder="0"><button class="iconbtn" data-step="1">+</button></div>
+    <p class="note">The five fard prayers are 17 rakats (2 + 4 + 4 + 3 + 4). · <span class="bn">পাঁচ ওয়াক্ত ফরজ = ১৭ রাকাত।</span></p></div>
+    <div class="card"><h3 style="margin-top:0">✅ Today I… · <span class="bn">আজ আমি…</span></h3>
+    ${MH_CHECKS.map(([k, ic, en, bn]) => `<button class="mhcheck ${e[k] ? 'on' : ''}" data-ck="${k}"><span class="mhbox">${e[k] ? '✓' : ''}</span><span>${ic} ${en}<br><span class="bn">${bn}</span></span></button>`).join('')}
+    <div id="mhQp" class="${e.quran ? '' : 'hidden'}"><label class="f">How much Quran? (pages or ayahs) · <span class="bn">কতটুকু পড়েছি</span></label><input type="text" id="mhQ" value="${esc(e.qamt || '')}" placeholder="e.g. 2 pages / Surah Al-Mulk"></div></div>
+    <div class="card"><h3 style="margin-top:0">🌱 One good deed today · <span class="bn">আজকের একটি ভালো কাজ</span></h3>
+    <textarea id="mhDeed" rows="2" placeholder="e.g. helped a neighbour, smiled at someone, gave water…">${esc(e.deed || '')}</textarea>
+    <h3>🤍 Alhamdulillah for… · <span class="bn">আজ যে জন্য শুকরিয়া</span></h3>
+    <textarea id="mhThanks" rows="2" placeholder="One thing I am grateful for today">${esc(e.thanks || '')}</textarea>
+    <h3>🎯 Tomorrow I will try to… · <span class="bn">আগামীকাল যা আরও ভালো করব</span></h3>
+    <textarea id="mhBetter" rows="2" placeholder="e.g. pray Fajr on time">${esc(e.better || '')}</textarea></div>
+    <div class="card"><div class="mhscore"><span>Today's score · <span class="bn">আজকের স্কোর</span></span><b id="mhPc">${mhScore(e)}%</b></div><div class="progress"><div id="mhBar" style="width:${mhScore(e)}%"></div></div></div>
+    <h2>My 30 days · <span class="bn">আমার ৩০ দিন</span></h2>
+    <div class="mhgrid">${[...Array(30)].map((_, i) => { const k = ymdAdd(mh.start, i); const lv = mhLevel(mhScore(mh.days[k])); return `<button class="mhday l${lv} ${k === date ? 'cur' : ''}" data-day="${k}" ${k > today ? 'disabled' : ''}>${i + 1}${lv === 3 ? '<small>★</small>' : ''}</button>`; }).join('')}</div>
+    <p class="note">Tap a day to fill it in or look back. Darker = better day. ★ = 75% or more.</p>
+    <div class="card"><h3 style="margin-top:0">📊 So far · <span class="bn">এ পর্যন্ত</span></h3>
+      <div class="mhstats"><div><b>${prayed ? Math.round(onTime / prayed * 100) : 0}%</b><span>prayers on time<br><span class="bn">সময়মতো নামাজ</span></span></div><div><b>${qd}</b><span>days with Quran<br><span class="bn">কুরআন পড়ার দিন</span></span></div><div><b>${hd}</b><span>days with hadith<br><span class="bn">হাদিস পড়ার দিন</span></span></div><div><b>${deeds}</b><span>good deeds<br><span class="bn">ভালো কাজ</span></span></div></div></div>
+    ${motive}
+    <div class="linkbtns">
+      <button class="btn" id="mhRem">🔔 Remind me every evening at 9:30 pm · <span class="bn">প্রতিদিন রাতে মনে করিয়ে দিন</span></button>
+      <button class="btn ghost" id="mhShare">${SHARE_ICON.replace('<svg', '<svg width="20" height="20" style="vertical-align:-4px"')} Share my progress · <span class="bn">অগ্রগতি শেয়ার করুন</span></button>
+      <button class="btn ghost" id="mhReset">${finished ? 'Start a new 30 days' : 'Start again from today'} · <span class="bn">নতুন করে শুরু</span></button>
+    </div>
+    <p class="note">Private: everything is saved only on this phone. If you delete the app or clear Safari data, it will be lost.</p>`;
+  $('#view').innerHTML = h;
+  const save = () => { mh.days[date] = e; mhSave(mh); const pc = mhScore(e); $('#mhPc').textContent = pc + '%'; $('#mhBar').style.width = pc + '%'; const cell = $(`.mhday[data-day="${date}"]`); if (cell) { cell.className = `mhday l${mhLevel(pc)} cur`; cell.innerHTML = (dayNo) + (mhLevel(pc) === 3 ? '<small>★</small>' : ''); } };
+  $('#view').querySelectorAll('[data-pr]').forEach(g => g.querySelectorAll('button').forEach(b => b.onclick = () => {
+    const k = g.dataset.pr; e.p[k] = e.p[k] === b.dataset.v ? undefined : b.dataset.v;
+    g.querySelectorAll('button').forEach(x => x.className = e.p[k] === x.dataset.v ? 'on ' + x.dataset.v : '');
+    save();
+  }));
+  $('#view').querySelectorAll('[data-ck]').forEach(b => b.onclick = () => {
+    const k = b.dataset.ck; e[k] = !e[k]; b.classList.toggle('on', e[k]); b.querySelector('.mhbox').textContent = e[k] ? '✓' : '';
+    if (k === 'quran') $('#mhQp').classList.toggle('hidden', !e.quran);
+    save();
+  });
+  const rak = $('#mhRak');
+  rak.oninput = () => { e.rak = rak.value === '' ? null : Math.max(0, parseInt(rak.value, 10) || 0); save(); };
+  $('#view').querySelectorAll('[data-step]').forEach(b => b.onclick = () => { e.rak = Math.max(0, (e.rak || 0) + +b.dataset.step); rak.value = e.rak; save(); });
+  [['mhQ', 'qamt'], ['mhDeed', 'deed'], ['mhThanks', 'thanks'], ['mhBetter', 'better']].forEach(([id, k]) => { $('#' + id).oninput = ev => { e[k] = ev.target.value; save(); }; });
+  $('#mhPrev').onclick = () => renderTracker({ date: ymdAdd(date, -1) });
+  $('#mhNext').onclick = () => renderTracker({ date: ymdAdd(date, 1) });
+  $('#view').querySelectorAll('[data-day]').forEach(b => b.onclick = () => { if (!b.disabled) renderTracker({ date: b.dataset.day }); });
+  $('#mhRem').onclick = () => {
+    const days = Math.max(1, ymdDiff(today, end) + 1);
+    const [y, m, d] = today.split('-').map(Number);
+    let first = new Date(y, m - 1, d, 21, 30);
+    if (first < new Date()) first = new Date(y, m - 1, d + 1, 21, 30);
+    downloadICS('iqra-daily-check.ics', [{ start: first, title: '📝 Daily check · আত্মসমালোচনা', desc: 'Two minutes to look back at your day. Open Iqra → Daily check.', rrule: `FREQ=DAILY;COUNT=${days}`, before: 0, mins: 10 }]);
+    toast('Tap "Add All" to save the reminder · ক্যালেন্ডারে যোগ করুন');
+  };
+  $('#mhShare').onclick = () => shareText('My 30-day check', `📝 My 30-day self-review with Iqra\n${finished ? '30 days complete' : 'Day ' + Math.min(dayNo, 30) + ' of 30'} · 🔥 ${streak}-day streak\n🕌 ${prayed ? Math.round(onTime / prayed * 100) : 0}% of prayers on time\n📖 Quran on ${qd} days · 📜 hadith on ${hd} days\n🌱 ${deeds} good deeds written down\n\n"The most beloved deeds to Allah are those done regularly, even if small." (Bukhari 6464)` + footer(APP_URL + '#tracker'));
+  const reset = $('#mhReset'); let armed = false;
+  reset.onclick = () => { if (!armed) { armed = true; reset.innerHTML = 'Tap again to confirm — this clears your 30 days · <span class="bn">আবার চাপুন</span>'; setTimeout(() => { armed = false; }, 4000); return; } mhSave({ start: today, days: {} }); renderTracker(); };
 }
 
 /* ---------- Hadith: Sahih al-Bukhari (open Hadith API by Fawaz Ahmed) ---------- */
@@ -1507,7 +1662,7 @@ applySettings();
   if (m && +m[1] >= 1 && +m[1] <= 30) go('reader', { juz: +m[1] });
   else if (/^surah-\d+$/.test(h) && +h.split('-')[1] >= 1 && +h.split('-')[1] <= 114) go('reader', { surah: +h.split('-')[1] });
   else if (/^bukhari-\d+$/.test(h)) go('book', { n: +h.split('-')[1] });
-  else if (['prayer', 'settings', 'hadith', 'ramadan'].includes(h)) go(h);
+  else if (['prayer', 'settings', 'hadith', 'ramadan', 'tracker'].includes(h)) go(h);
   else go('quran');
 })();
 if ('serviceWorker' in navigator && location.protocol.startsWith('http')) navigator.serviceWorker.register('sw.js').catch(() => {});

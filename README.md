@@ -24,6 +24,9 @@ Short, authentic lessons in English and Bangla, each with its source (hadith lin
 - **Benefits of Ramadan** · **Laylatul Qadr** (with the dua taught to Aisha RA) · **How the Quran came** · **Benefits of reading the Quran** · **Zakat**
 - **Zakat calculator**: silver or gold nisab, today's price per gram, savings, gold, investments, business stock, money owed and debts, plus a fitrana calculator.
 
+## Daily check · আত্মসমালোচনা (30 days)
+A private 30-day self-review (muhasaba). Each day: the five prayers (on time / late / missed), total rakats, Quran, hadith, sunnah prayers, adhkar, charity, kindness to family, guarding the tongue, one good deed, one thing you're grateful for and one thing to improve tomorrow. You get a daily score, a 30-day colour calendar, a streak, progress stats, a daily evening reminder and a Share button. Everything stays on your phone.
+
 ## Reminders
 Add alerts for the five daily prayers, sehri and iftar in Ramadan, and a weekly Friday reminder to read Surah Al-Kahf. They go into your iPhone Calendar, so they ring even when the app is closed.
 
