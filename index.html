@@ -1,0 +1,1074 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Path of Guidance · হেদায়েতের পথ</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Path of Guidance">
+<meta name="theme-color" content="#FBF6E9">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Lexend:wght@400;600&family=Noto+Sans+Bengali:wght@400;600&family=Hind+Siliguri:wght@400;600&family=Scheherazade+New:wght@400;700&family=Amiri:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#FBF6E9; --fg:#2B2A28; --muted:#6B675F; --card:#FFFDF6; --line:#E6DCC4; --accent:#1F6F5C; --accent-soft:#DCEFE7; --hl:#FFF0B8;
+  --scale:1.15; --lh:1.9; --ls:0em; --ws:0em;
+  --ui-font:'Lexend',system-ui,sans-serif; --bn-font:'Noto Sans Bengali',sans-serif; --ar-font:'Scheherazade New',serif;
+  --safe-top:env(safe-area-inset-top,0px); --safe-bot:env(safe-area-inset-bottom,0px);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--fg)}
+body{font-family:var(--ui-font);font-size:calc(17px * var(--scale));line-height:1.5;letter-spacing:var(--ls);word-spacing:var(--ws);-webkit-text-size-adjust:100%;min-height:100vh}
+button,select,input{font:inherit;color:inherit}
+button{cursor:pointer}
+.bn{font-family:var(--bn-font)}
+.muted{color:var(--muted)}
+.hidden{display:none!important}
+
+/* layout */
+header.top{position:sticky;top:0;z-index:20;background:var(--bg);padding:calc(var(--safe-top) + 10px) 16px 10px;border-bottom:2px solid var(--line);display:flex;align-items:center;gap:10px}
+header.top h1{font-size:1.15em;margin:0;flex:1;font-weight:600;line-height:1.3}
+header.top h1 small{display:block;font-weight:400;font-size:.8em;color:var(--muted)}
+.iconbtn{min-width:48px;min-height:48px;border-radius:14px;border:2px solid var(--line);background:var(--card);display:inline-flex;align-items:center;justify-content:center;font-weight:600;padding:0 12px}
+main{padding:16px 16px calc(110px + var(--safe-bot));max-width:760px;margin:0 auto}
+nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:30;background:var(--card);border-top:2px solid var(--line);display:flex;padding:6px 6px calc(6px + var(--safe-bot))}
+nav.tabs button{flex:1;border:0;background:none;padding:8px 2px;border-radius:14px;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:.78em;color:var(--muted);min-height:56px}
+nav.tabs button svg{width:26px;height:26px}
+nav.tabs button .b{font-family:var(--bn-font);font-size:.92em}
+nav.tabs{gap:2px}
+nav.tabs button{font-size:.72em;line-height:1.2}
+nav.tabs button.on{color:var(--accent);background:var(--accent-soft);font-weight:600}
+
+.card{background:var(--card);border:2px solid var(--line);border-radius:18px;padding:16px;margin-bottom:14px}
+h2{font-size:1.1em;margin:22px 0 10px}
+.btn{border:2px solid var(--accent);background:var(--accent);color:#fff;border-radius:14px;padding:12px 18px;min-height:50px;font-weight:600}
+.btn.ghost{background:transparent;color:var(--accent)}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+
+/* para list */
+.paras{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
+.para{border:2px solid var(--line);background:var(--card);border-radius:18px;padding:14px;text-align:left;min-height:96px;display:flex;flex-direction:column;gap:4px}
+.para .num{font-size:1.5em;font-weight:600;color:var(--accent);line-height:1.1}
+.para .nm{font-size:.85em}
+.para .dl{font-size:.75em;color:var(--muted)}
+.continue{display:flex;justify-content:space-between;align-items:center;gap:12px;width:100%;text-align:left;border-color:var(--accent)}
+
+/* reader */
+.surah-head{text-align:center;margin:26px 0 16px;padding:16px;border-radius:18px;background:var(--accent-soft);border:2px solid var(--line)}
+.surah-head .ar{font-family:var(--ar-font);font-size:1.8em;line-height:1.6}
+.surah-head .en{font-weight:600}
+.bism{font-family:var(--ar-font);font-size:calc(1.6em * var(--ar-mult,1));text-align:center;direction:rtl;margin:6px 0 18px;line-height:2}
+.verse{background:var(--card);border:2px solid var(--line);border-radius:18px;padding:14px 16px;margin-bottom:12px;scroll-margin-top:calc(90px + var(--safe-top));transition:opacity .2s}
+.verse .ref{display:inline-flex;align-items:center;justify-content:center;min-width:2.6em;padding:2px 10px;border-radius:999px;background:var(--accent-soft);color:var(--accent);font-weight:600;font-size:.8em}
+.verse .ar{font-family:var(--ar-font);direction:rtl;text-align:right;font-size:calc(1.75em * var(--ar-mult,1));line-height:2.1;margin:10px 0 6px;letter-spacing:0;word-spacing:normal}
+.verse .tr{font-family:var(--bn-font);line-height:var(--lh);font-size:1.05em;text-align:left;margin-top:6px}
+.verse .sajda{font-size:.75em;color:var(--accent);margin-left:8px}
+.focus-on .verse{opacity:.28}
+.focus-on .verse.is-focus{opacity:1;border-color:var(--accent);background:var(--hl);box-shadow:0 0 0 3px var(--accent-soft)}
+.focusbar{position:fixed;left:0;right:0;bottom:calc(76px + var(--safe-bot));z-index:25;display:flex;justify-content:center;gap:10px;padding:8px;pointer-events:none}
+.focusbar button{pointer-events:auto;box-shadow:0 4px 14px rgba(0,0,0,.18)}
+.ruler{position:fixed;left:0;right:0;height:calc(5.5em * var(--scale));top:40%;pointer-events:none;z-index:15;border-top:3px solid var(--accent);border-bottom:3px solid var(--accent);box-shadow:0 0 0 100vmax rgba(20,20,20,.38)}
+.loading{text-align:center;padding:40px 10px}
+.spinner{width:42px;height:42px;border:5px solid var(--line);border-top-color:var(--accent);border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 14px}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* prayer */
+.loc{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.loc .place{font-size:1.2em;font-weight:600}
+.next{background:var(--accent);color:#fff;border-color:var(--accent)}
+.next .label{opacity:.9;font-size:.9em}
+.next .big{font-size:2em;font-weight:600;line-height:1.2}
+.ptimes{list-style:none;margin:0;padding:0}
+.ptimes li{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;border:2px solid var(--line);background:var(--card);border-radius:16px;margin-bottom:10px;font-size:1.05em}
+.ptimes li .t{font-weight:600;font-variant-numeric:tabular-nums;font-size:1.15em}
+.ptimes li.is-next{border-color:var(--accent);background:var(--accent-soft)}
+.ptimes li.sun{opacity:.75;font-size:.95em}
+.ptimes li .nm small{display:block;color:var(--muted);font-size:.8em}
+table.week{width:100%;border-collapse:separate;border-spacing:0 6px;font-size:.85em;font-variant-numeric:tabular-nums}
+table.week th{text-align:left;color:var(--muted);font-weight:600;padding:4px 6px}
+table.week td{background:var(--card);padding:10px 6px;border-top:2px solid var(--line);border-bottom:2px solid var(--line)}
+table.week td:first-child{border-left:2px solid var(--line);border-radius:12px 0 0 12px;font-weight:600}
+table.week td:last-child{border-right:2px solid var(--line);border-radius:0 12px 12px 0}
+.weekwrap{overflow-x:auto}
+
+/* forms */
+label.f{display:block;margin:14px 0 6px;font-weight:600}
+select,input[type=search],input[type=number]{width:100%;min-height:50px;border:2px solid var(--line);border-radius:14px;background:var(--card);padding:10px 12px}
+input[type=range]{width:100%;height:40px;accent-color:var(--accent)}
+.swatches{display:flex;gap:10px;flex-wrap:wrap}
+.swatch{width:58px;height:58px;border-radius:16px;border:3px solid var(--line);font-size:.7em;display:flex;align-items:flex-end;justify-content:center;padding-bottom:4px}
+.swatch.on{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.toggle{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 0;border-bottom:2px dashed var(--line)}
+.toggle input{width:28px;height:28px;accent-color:var(--accent)}
+.seg{display:flex;border:2px solid var(--line);border-radius:14px;overflow:hidden}
+.seg button{flex:1;border:0;background:var(--card);min-height:48px;padding:6px}
+.seg button.on{background:var(--accent);color:#fff;font-weight:600}
+.preview{margin-top:10px}
+
+/* hadith */
+.verse .tx{line-height:var(--lh);margin-top:10px;white-space:pre-line}
+.verse .tx.en{font-family:var(--ui-font)}
+.verse .tx.bnt{font-family:var(--bn-font)}
+.verse .lang{display:block;font-size:.72em;font-weight:600;color:var(--muted);letter-spacing:.04em;margin-top:12px}
+.books{list-style:none;margin:0;padding:0}
+.books li button{width:100%;text-align:left;display:flex;gap:14px;align-items:center;border:2px solid var(--line);background:var(--card);border-radius:16px;padding:12px 14px;margin-bottom:10px;min-height:60px}
+.books .bn-no{min-width:2.4em;height:2.4em;border-radius:12px;background:var(--accent-soft);color:var(--accent);font-weight:600;display:flex;align-items:center;justify-content:center}
+input.filter{margin-bottom:12px}
+/* ramadan */
+.rhero{background:var(--accent);color:#fff;border-color:var(--accent)}
+.rhero .big{font-size:1.6em;font-weight:600;line-height:1.3}
+.twin{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.twin .card{margin:0;text-align:center}
+.twin .t{font-size:1.7em;font-weight:600;font-variant-numeric:tabular-nums}
+details.info{background:var(--card);border:2px solid var(--line);border-radius:16px;margin-bottom:10px;padding:0 16px}
+details.info summary{min-height:56px;display:flex;align-items:center;font-weight:600;cursor:pointer;list-style:none;padding:10px 0}
+details.info summary::after{content:'+';margin-left:auto;font-size:1.4em;color:var(--accent)}
+details.info[open] summary::after{content:'−'}
+details.info p{margin:0 0 14px;line-height:var(--lh)}
+details.info .bn{line-height:var(--lh)}
+.linkbtns{display:flex;flex-direction:column;gap:10px}
+.linkbtns .btn{text-align:left}
+tr.today td{background:var(--accent-soft)}
+
+/* sheet */
+.sheet-back{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:50;display:flex;align-items:flex-end;justify-content:center}
+.sheet{background:var(--bg);width:100%;max-width:760px;max-height:88vh;overflow:auto;border-radius:22px 22px 0 0;padding:18px 16px calc(24px + var(--safe-bot));border-top:3px solid var(--line)}
+.sheet .grab{width:48px;height:6px;border-radius:3px;background:var(--line);margin:0 auto 12px}
+.citylist{list-style:none;margin:10px 0 0;padding:0}
+.citylist li button{width:100%;text-align:left;border:0;border-bottom:2px solid var(--line);background:none;padding:14px 6px;min-height:52px}
+.citylist li button b{font-weight:600}
+.note{font-size:.85em;color:var(--muted);line-height:1.6}
+.progress{height:14px;border-radius:7px;background:var(--line);overflow:hidden;margin-top:10px}
+.progress div{height:100%;background:var(--accent);width:0;transition:width .3s}
+</style>
+</head>
+<body>
+
+<header class="top" id="topbar">
+  <button class="iconbtn hidden" id="backBtn" aria-label="Back">‹ Back</button>
+  <h1 id="title">Quran · <span class="bn">কুরআন</span><small id="subtitle" class="bn">৩০ পারা · আরবি ও বাংলা অনুবাদ</small></h1>
+  <button class="iconbtn hidden" id="focusBtn" aria-label="Focus mode" title="Focus mode">Focus</button>
+  <button class="iconbtn hidden" id="aaBtn" aria-label="Text settings">Aa</button>
+</header>
+
+<main id="view"></main>
+
+<div class="focusbar hidden" id="focusbar">
+  <button class="btn" id="prevV">↑ Previous</button>
+  <button class="btn" id="nextV">Next ↓</button>
+</div>
+<div class="ruler hidden" id="ruler"></div>
+
+<nav class="tabs" id="tabs">
+  <button data-tab="quran" class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4.5A2.5 2.5 0 0 1 6.5 2H20v17H6.5A2.5 2.5 0 0 0 4 21.5z"/><path d="M4 21.5V4.5"/><path d="M8 7h8M8 11h6"/></svg><span>Quran</span><span class="b">কুরআন</span></button>
+  <button data-tab="hadith"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h11a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6z"/><path d="M6 3a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2"/><path d="M9 8h7M9 12h7M9 16h4"/></svg><span>Hadith</span><span class="b">হাদিস</span></button>
+  <button data-tab="prayer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span>Prayer</span><span class="b">নামাজ</span></button>
+  <button data-tab="ramadan"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/><path d="M17 3l.6 1.4L19 5l-1.4.6L17 7l-.6-1.4L15 5l1.4-.6z"/></svg><span>Ramadan</span><span class="b">রমজান</span></button>
+  <button data-tab="settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg><span>Settings</span><span class="b">সেটিংস</span></button>
+</nav>
+
+<script>
+/*CALC-START*/
+/* ---------- Prayer time calculation (based on the PrayTimes.org algorithm) ---------- */
+const PT = (() => {
+  const DR = Math.PI / 180;
+  const dsin = d => Math.sin(d * DR), dcos = d => Math.cos(d * DR), dtan = d => Math.tan(d * DR);
+  const darcsin = x => Math.asin(x) / DR, darccos = x => Math.acos(x) / DR;
+  const darctan2 = (y, x) => Math.atan2(y, x) / DR, darccot = x => Math.atan(1 / x) / DR;
+  const fix = (a, b) => { a = a - b * Math.floor(a / b); return a < 0 ? a + b : a; };
+  const diff = (a, b) => fix(b - a, 24);
+
+  const METHODS = {
+    MWL:      { name: 'Muslim World League', fajr: 18, isha: 17 },
+    Karachi:  { name: 'Univ. of Islamic Sciences, Karachi', fajr: 18, isha: 18 },
+    ISNA:     { name: 'ISNA (North America)', fajr: 15, isha: 15 },
+    Egypt:    { name: 'Egyptian General Authority', fajr: 19.5, isha: 17.5 },
+    Makkah:   { name: 'Umm al-Qura, Makkah', fajr: 18.5, ishaMin: 90, ramadanIshaMin: 120 },
+    Dubai:    { name: 'Dubai (UAE)', fajr: 18.2, isha: 18.2 },
+    Gulf:     { name: 'Gulf region', fajr: 19.5, ishaMin: 90 },
+    Kuwait:   { name: 'Kuwait', fajr: 18, isha: 17.5 },
+    Qatar:    { name: 'Qatar', fajr: 18, ishaMin: 90 },
+    Singapore:{ name: 'Singapore / Malaysia / Indonesia', fajr: 20, isha: 18 },
+    Turkey:   { name: 'Turkey (Diyanet)', fajr: 18, isha: 17 },
+    Tehran:   { name: 'Tehran (Jafari)', fajr: 17.7, isha: 14, maghrib: 4.5 },
+    Russia:   { name: 'Russia', fajr: 16, isha: 15 },
+    France:   { name: 'France (UOIF 12°)', fajr: 12, isha: 12 },
+  };
+
+  function julian(y, m, d) {
+    if (m <= 2) { y -= 1; m += 12; }
+    const A = Math.floor(y / 100), B = 2 - A + Math.floor(A / 4);
+    return Math.floor(365.25 * (y + 4716)) + Math.floor(30.6001 * (m + 1)) + d + B - 1524.5;
+  }
+  function sunPos(jd) {
+    const D = jd - 2451545.0;
+    const g = fix(357.529 + 0.98560028 * D, 360);
+    const q = fix(280.459 + 0.98564736 * D, 360);
+    const L = fix(q + 1.915 * dsin(g) + 0.020 * dsin(2 * g), 360);
+    const e = 23.439 - 0.00000036 * D;
+    const RA = darctan2(dcos(e) * dsin(L), dcos(L)) / 15;
+    return { decl: darcsin(dsin(e) * dsin(L)), eqt: q / 15 - fix(RA, 24) };
+  }
+
+  /* Returns prayer times as UTC hours relative to 00:00 UTC of the given local date. */
+  function hours(y, m, d, lat, lng, opts) {
+    const method = METHODS[opts.method] || METHODS.MWL;
+    const asrFactor = opts.asr === 'Hanafi' ? 2 : 1;
+    const jDate = julian(y, m, d) - lng / (15 * 24);
+    const midDay = t => fix(12 - sunPos(jDate + t).eqt, 24);
+    const sunAngleTime = (angle, t, ccw) => {
+      const decl = sunPos(jDate + t).decl;
+      const noon = midDay(t);
+      const T = darccos((-dsin(angle) - dsin(decl) * dsin(lat)) / (dcos(decl) * dcos(lat))) / 15;
+      return noon + (ccw ? -T : T);
+    };
+    const asrTime = (f, t) => {
+      const decl = sunPos(jDate + t).decl;
+      return sunAngleTime(-darccot(f + dtan(Math.abs(lat - decl))), t);
+    };
+    const RS = 0.833;
+    let t = { fajr: 5, sunrise: 6, dhuhr: 12, asr: 13, sunset: 18, maghrib: 18, isha: 18 };
+    for (let i = 0; i < 2; i++) {
+      const p = k => (isFinite(t[k]) ? t[k] : ({ fajr: 5, isha: 18, maghrib: 18 })[k]) / 24;
+      t = {
+        fajr: sunAngleTime(method.fajr, p('fajr'), true),
+        sunrise: sunAngleTime(RS, p('sunrise'), true),
+        dhuhr: midDay(p('dhuhr')),
+        asr: asrTime(asrFactor, p('asr')),
+        sunset: sunAngleTime(RS, p('sunset')),
+        maghrib: method.maghrib ? sunAngleTime(method.maghrib, p('maghrib')) : NaN,
+        isha: method.isha ? sunAngleTime(method.isha, p('isha')) : NaN,
+      };
+    }
+    // high-latitude adjustment
+    const night = diff(t.sunset, t.sunrise);
+    const rule = opts.highLat || 'AngleBased';
+    const portion = angle => rule === 'NightMiddle' ? night / 2 : rule === 'OneSeventh' ? night / 7 : (angle / 60) * night;
+    if (isNaN(t.fajr) || diff(t.fajr, t.sunrise) > portion(method.fajr)) t.fajr = t.sunrise - portion(method.fajr);
+    if (method.isha && (isNaN(t.isha) || diff(t.sunset, t.isha) > portion(method.isha))) t.isha = t.sunset + portion(method.isha);
+    if (method.maghrib && (isNaN(t.maghrib) || diff(t.sunset, t.maghrib) > portion(method.maghrib))) t.maghrib = t.sunset + portion(method.maghrib);
+    if (!method.maghrib) t.maghrib = t.sunset;
+    if (method.ishaMin) t.isha = t.maghrib + ((opts.ramadan && method.ramadanIshaMin) || method.ishaMin) / 60;
+    const shift = -lng / 15;
+    const out = {};
+    for (const k of ['fajr', 'sunrise', 'dhuhr', 'asr', 'maghrib', 'isha']) out[k] = t[k] + shift;
+    return out;
+  }
+
+  /* Calendar date (y,m,d) "today" in a given IANA time zone */
+  function localYMD(tz, date = new Date()) {
+    const parts = new Intl.DateTimeFormat('en-CA', { timeZone: tz, year: 'numeric', month: '2-digit', day: '2-digit' }).formatToParts(date);
+    const g = type => +parts.find(p => p.type === type).value;
+    return { y: g('year'), m: g('month'), d: g('day') };
+  }
+  function isRamadan(date, tz) {
+    try {
+      const parts = new Intl.DateTimeFormat('en-u-ca-islamic-umalqura', { timeZone: tz, month: 'numeric' }).formatToParts(date);
+      return +parts.find(p => p.type === 'month').value === 9;
+    } catch (e) { return false; }
+  }
+
+  /* Prayer times as Date instants for the local date (y,m,d) at the place */
+  function forDate(y, m, d, place, opts) {
+    const noonUTC = new Date(Date.UTC(y, m - 1, d, 12));
+    const h = hours(y, m, d, place.lat, place.lng, { ...opts, ramadan: isRamadan(noonUTC, place.tz) });
+    const base = Date.UTC(y, m - 1, d);
+    const res = {};
+    for (const k in h) res[k] = isFinite(h[k]) ? new Date(Math.round((base + h[k] * 3600000) / 60000) * 60000) : null;
+    return res;
+  }
+  return { METHODS, forDate, localYMD };
+})();
+/*CALC-END*/
+
+/* ---------- Places: 100+ countries (capital + major cities) ---------- */
+// [country, city, lat, lng, timeZone, method, asr]
+const PLACES = [
+["Afghanistan","Kabul",34.555,69.207,"Asia/Kabul","Karachi","Hanafi"],
+["Albania","Tirana",41.327,19.819,"Europe/Tirane","MWL"],
+["Algeria","Algiers",36.754,3.059,"Africa/Algiers","MWL"],
+["Angola","Luanda",-8.839,13.289,"Africa/Luanda","MWL"],
+["Argentina","Buenos Aires",-34.604,-58.382,"America/Argentina/Buenos_Aires","MWL"],
+["Armenia","Yerevan",40.179,44.499,"Asia/Yerevan","MWL"],
+["Australia","Sydney",-33.869,151.209,"Australia/Sydney","MWL"],
+["Australia","Melbourne",-37.814,144.963,"Australia/Melbourne","MWL"],
+["Australia","Canberra",-35.281,149.130,"Australia/Sydney","MWL"],
+["Austria","Vienna",48.208,16.374,"Europe/Vienna","MWL"],
+["Azerbaijan","Baku",40.409,49.867,"Asia/Baku","MWL"],
+["Bahrain","Manama",26.229,50.586,"Asia/Bahrain","Gulf"],
+["Bangladesh","Dhaka",23.810,90.413,"Asia/Dhaka","Karachi","Hanafi"],
+["Bangladesh","Chattogram",22.357,91.784,"Asia/Dhaka","Karachi","Hanafi"],
+["Bangladesh","Sylhet",24.895,91.869,"Asia/Dhaka","Karachi","Hanafi"],
+["Bangladesh","Rajshahi",24.374,88.604,"Asia/Dhaka","Karachi","Hanafi"],
+["Bangladesh","Khulna",22.846,89.540,"Asia/Dhaka","Karachi","Hanafi"],
+["Belarus","Minsk",53.902,27.562,"Europe/Minsk","MWL"],
+["Belgium","Brussels",50.850,4.352,"Europe/Brussels","MWL"],
+["Benin","Porto-Novo",6.497,2.605,"Africa/Porto-Novo","MWL"],
+["Bhutan","Thimphu",27.472,89.639,"Asia/Thimphu","Karachi"],
+["Bolivia","La Paz",-16.490,-68.119,"America/La_Paz","MWL"],
+["Bosnia and Herzegovina","Sarajevo",43.856,18.413,"Europe/Sarajevo","MWL"],
+["Botswana","Gaborone",-24.628,25.923,"Africa/Gaborone","MWL"],
+["Brazil","Brasília",-15.794,-47.882,"America/Sao_Paulo","MWL"],
+["Brazil","São Paulo",-23.551,-46.633,"America/Sao_Paulo","MWL"],
+["Brunei","Bandar Seri Begawan",4.903,114.940,"Asia/Brunei","Singapore"],
+["Bulgaria","Sofia",42.698,23.322,"Europe/Sofia","MWL"],
+["Burkina Faso","Ouagadougou",12.371,-1.520,"Africa/Ouagadougou","MWL"],
+["Cambodia","Phnom Penh",11.556,104.928,"Asia/Phnom_Penh","MWL"],
+["Cameroon","Yaoundé",3.848,11.502,"Africa/Douala","MWL"],
+["Canada","Ottawa",45.421,-75.697,"America/Toronto","ISNA"],
+["Canada","Toronto",43.653,-79.383,"America/Toronto","ISNA"],
+["Canada","Montreal",45.502,-73.567,"America/Toronto","ISNA"],
+["Canada","Vancouver",49.283,-123.121,"America/Vancouver","ISNA"],
+["Chad","N'Djamena",12.134,15.056,"Africa/Ndjamena","MWL"],
+["Chile","Santiago",-33.449,-70.669,"America/Santiago","MWL"],
+["China","Beijing",39.904,116.407,"Asia/Shanghai","MWL"],
+["Colombia","Bogotá",4.711,-74.072,"America/Bogota","MWL"],
+["Comoros","Moroni",-11.704,43.240,"Indian/Comoro","MWL"],
+["Croatia","Zagreb",45.815,15.982,"Europe/Zagreb","MWL"],
+["Cuba","Havana",23.113,-82.366,"America/Havana","ISNA"],
+["Cyprus","Nicosia",35.185,33.382,"Asia/Nicosia","MWL"],
+["Czechia","Prague",50.075,14.438,"Europe/Prague","MWL"],
+["DR Congo","Kinshasa",-4.441,15.266,"Africa/Kinshasa","MWL"],
+["Denmark","Copenhagen",55.676,12.568,"Europe/Copenhagen","MWL"],
+["Djibouti","Djibouti",11.589,43.145,"Africa/Djibouti","MWL"],
+["Ecuador","Quito",-0.181,-78.468,"America/Guayaquil","MWL"],
+["Egypt","Cairo",30.044,31.236,"Africa/Cairo","Egypt"],
+["Eritrea","Asmara",15.322,38.925,"Africa/Asmara","MWL"],
+["Estonia","Tallinn",59.437,24.754,"Europe/Tallinn","MWL"],
+["Ethiopia","Addis Ababa",9.030,38.740,"Africa/Addis_Ababa","MWL"],
+["Fiji","Suva",-18.124,178.450,"Pacific/Fiji","MWL"],
+["Finland","Helsinki",60.170,24.938,"Europe/Helsinki","MWL"],
+["France","Paris",48.857,2.352,"Europe/Paris","MWL"],
+["France","Marseille",43.296,5.370,"Europe/Paris","MWL"],
+["Gabon","Libreville",0.416,9.467,"Africa/Libreville","MWL"],
+["Gambia","Banjul",13.454,-16.579,"Africa/Banjul","MWL"],
+["Georgia","Tbilisi",41.716,44.783,"Asia/Tbilisi","MWL"],
+["Germany","Berlin",52.520,13.405,"Europe/Berlin","MWL"],
+["Germany","Frankfurt",50.110,8.682,"Europe/Berlin","MWL"],
+["Ghana","Accra",5.604,-0.187,"Africa/Accra","MWL"],
+["Greece","Athens",37.984,23.728,"Europe/Athens","MWL"],
+["Guinea","Conakry",9.641,-13.578,"Africa/Conakry","MWL"],
+["Guyana","Georgetown",6.801,-58.155,"America/Guyana","MWL"],
+["Hong Kong","Hong Kong",22.320,114.169,"Asia/Hong_Kong","MWL"],
+["Hungary","Budapest",47.498,19.040,"Europe/Budapest","MWL"],
+["Iceland","Reykjavík",64.147,-21.942,"Atlantic/Reykjavik","MWL"],
+["India","New Delhi",28.614,77.209,"Asia/Kolkata","Karachi","Hanafi"],
+["India","Mumbai",19.076,72.878,"Asia/Kolkata","Karachi","Hanafi"],
+["India","Kolkata",22.573,88.364,"Asia/Kolkata","Karachi","Hanafi"],
+["India","Hyderabad",17.385,78.487,"Asia/Kolkata","Karachi","Hanafi"],
+["Indonesia","Jakarta",-6.208,106.846,"Asia/Jakarta","Singapore"],
+["Iran","Tehran",35.689,51.389,"Asia/Tehran","Tehran"],
+["Iraq","Baghdad",33.315,44.366,"Asia/Baghdad","MWL"],
+["Ireland","Dublin",53.350,-6.260,"Europe/Dublin","MWL"],
+["Italy","Rome",41.903,12.496,"Europe/Rome","MWL"],
+["Italy","Milan",45.464,9.190,"Europe/Rome","MWL"],
+["Ivory Coast","Abidjan",5.360,-4.008,"Africa/Abidjan","MWL"],
+["Jamaica","Kingston",18.018,-76.810,"America/Jamaica","ISNA"],
+["Japan","Tokyo",35.676,139.650,"Asia/Tokyo","MWL"],
+["Jordan","Amman",31.946,35.928,"Asia/Amman","MWL"],
+["Kazakhstan","Astana",51.169,71.449,"Asia/Almaty","MWL"],
+["Kazakhstan","Almaty",43.238,76.946,"Asia/Almaty","MWL"],
+["Kenya","Nairobi",-1.292,36.822,"Africa/Nairobi","MWL"],
+["Kenya","Mombasa",-4.043,39.668,"Africa/Nairobi","MWL"],
+["Kosovo","Pristina",42.663,21.165,"Europe/Belgrade","MWL"],
+["Kuwait","Kuwait City",29.376,47.977,"Asia/Kuwait","Kuwait"],
+["Kyrgyzstan","Bishkek",42.875,74.570,"Asia/Bishkek","MWL"],
+["Laos","Vientiane",17.975,102.633,"Asia/Vientiane","MWL"],
+["Latvia","Riga",56.950,24.105,"Europe/Riga","MWL"],
+["Lebanon","Beirut",33.894,35.502,"Asia/Beirut","MWL"],
+["Liberia","Monrovia",6.301,-10.797,"Africa/Monrovia","MWL"],
+["Libya","Tripoli",32.887,13.191,"Africa/Tripoli","MWL"],
+["Lithuania","Vilnius",54.687,25.280,"Europe/Vilnius","MWL"],
+["Luxembourg","Luxembourg",49.612,6.130,"Europe/Luxembourg","MWL"],
+["Madagascar","Antananarivo",-18.879,47.508,"Indian/Antananarivo","MWL"],
+["Malawi","Lilongwe",-13.963,33.775,"Africa/Blantyre","MWL"],
+["Malaysia","Kuala Lumpur",3.139,101.687,"Asia/Kuala_Lumpur","Singapore"],
+["Maldives","Malé",4.175,73.509,"Indian/Maldives","MWL"],
+["Mali","Bamako",12.639,-8.003,"Africa/Bamako","MWL"],
+["Malta","Valletta",35.899,14.514,"Europe/Malta","MWL"],
+["Mauritania","Nouakchott",18.074,-15.958,"Africa/Nouakchott","MWL"],
+["Mauritius","Port Louis",-20.161,57.499,"Indian/Mauritius","MWL"],
+["Mexico","Mexico City",19.433,-99.133,"America/Mexico_City","ISNA"],
+["Moldova","Chișinău",47.011,28.864,"Europe/Chisinau","MWL"],
+["Mongolia","Ulaanbaatar",47.886,106.906,"Asia/Ulaanbaatar","MWL"],
+["Montenegro","Podgorica",42.441,19.263,"Europe/Podgorica","MWL"],
+["Morocco","Rabat",34.020,-6.842,"Africa/Casablanca","MWL"],
+["Morocco","Casablanca",33.573,-7.590,"Africa/Casablanca","MWL"],
+["Mozambique","Maputo",-25.969,32.573,"Africa/Maputo","MWL"],
+["Myanmar","Yangon",16.840,96.173,"Asia/Yangon","Karachi"],
+["Nepal","Kathmandu",27.717,85.324,"Asia/Kathmandu","Karachi"],
+["Netherlands","Amsterdam",52.368,4.904,"Europe/Amsterdam","MWL"],
+["New Zealand","Wellington",-41.286,174.776,"Pacific/Auckland","MWL"],
+["New Zealand","Auckland",-36.848,174.763,"Pacific/Auckland","MWL"],
+["Niger","Niamey",13.512,2.112,"Africa/Niamey","MWL"],
+["Nigeria","Abuja",9.076,7.399,"Africa/Lagos","MWL"],
+["Nigeria","Lagos",6.524,3.379,"Africa/Lagos","MWL"],
+["Nigeria","Kano",12.002,8.592,"Africa/Lagos","MWL"],
+["North Macedonia","Skopje",41.998,21.425,"Europe/Skopje","MWL"],
+["Norway","Oslo",59.914,10.752,"Europe/Oslo","MWL"],
+["Oman","Muscat",23.588,58.383,"Asia/Muscat","Gulf"],
+["Pakistan","Islamabad",33.684,73.048,"Asia/Karachi","Karachi","Hanafi"],
+["Pakistan","Karachi",24.861,67.010,"Asia/Karachi","Karachi","Hanafi"],
+["Pakistan","Lahore",31.520,74.359,"Asia/Karachi","Karachi","Hanafi"],
+["Palestine","Al-Quds (Jerusalem)",31.778,35.235,"Asia/Hebron","MWL"],
+["Palestine","Gaza",31.502,34.467,"Asia/Gaza","MWL"],
+["Panama","Panama City",8.983,-79.517,"America/Panama","ISNA"],
+["Peru","Lima",-12.046,-77.043,"America/Lima","MWL"],
+["Philippines","Manila",14.600,120.984,"Asia/Manila","MWL"],
+["Poland","Warsaw",52.230,21.012,"Europe/Warsaw","MWL"],
+["Portugal","Lisbon",38.722,-9.139,"Europe/Lisbon","MWL"],
+["Qatar","Doha",25.285,51.531,"Asia/Qatar","Qatar"],
+["Romania","Bucharest",44.427,26.103,"Europe/Bucharest","MWL"],
+["Russia","Moscow",55.756,37.617,"Europe/Moscow","Russia"],
+["Russia","Kazan",55.796,49.106,"Europe/Moscow","Russia"],
+["Rwanda","Kigali",-1.944,30.062,"Africa/Kigali","MWL"],
+["Saudi Arabia","Makkah",21.389,39.858,"Asia/Riyadh","Makkah"],
+["Saudi Arabia","Madinah",24.467,39.611,"Asia/Riyadh","Makkah"],
+["Saudi Arabia","Riyadh",24.713,46.675,"Asia/Riyadh","Makkah"],
+["Saudi Arabia","Jeddah",21.485,39.193,"Asia/Riyadh","Makkah"],
+["Senegal","Dakar",14.716,-17.467,"Africa/Dakar","MWL"],
+["Serbia","Belgrade",44.787,20.457,"Europe/Belgrade","MWL"],
+["Sierra Leone","Freetown",8.465,-13.232,"Africa/Freetown","MWL"],
+["Singapore","Singapore",1.352,103.820,"Asia/Singapore","Singapore"],
+["Slovakia","Bratislava",48.149,17.107,"Europe/Bratislava","MWL"],
+["Slovenia","Ljubljana",46.057,14.506,"Europe/Ljubljana","MWL"],
+["Somalia","Mogadishu",2.047,45.318,"Africa/Mogadishu","MWL"],
+["South Africa","Johannesburg",-26.204,28.047,"Africa/Johannesburg","MWL"],
+["South Africa","Cape Town",-33.925,18.424,"Africa/Johannesburg","MWL"],
+["South Korea","Seoul",37.567,126.978,"Asia/Seoul","MWL"],
+["Spain","Madrid",40.417,-3.704,"Europe/Madrid","MWL"],
+["Spain","Barcelona",41.385,2.173,"Europe/Madrid","MWL"],
+["Sri Lanka","Colombo",6.927,79.861,"Asia/Colombo","Karachi"],
+["Sudan","Khartoum",15.501,32.560,"Africa/Khartoum","Egypt"],
+["Suriname","Paramaribo",5.852,-55.204,"America/Paramaribo","MWL"],
+["Sweden","Stockholm",59.329,18.069,"Europe/Stockholm","MWL"],
+["Switzerland","Bern",46.948,7.447,"Europe/Zurich","MWL"],
+["Switzerland","Zürich",47.377,8.541,"Europe/Zurich","MWL"],
+["Syria","Damascus",33.514,36.277,"Asia/Damascus","MWL"],
+["Taiwan","Taipei",25.033,121.565,"Asia/Taipei","MWL"],
+["Tajikistan","Dushanbe",38.560,68.787,"Asia/Dushanbe","MWL"],
+["Tanzania","Dodoma",-6.163,35.752,"Africa/Dar_es_Salaam","MWL"],
+["Tanzania","Dar es Salaam",-6.792,39.208,"Africa/Dar_es_Salaam","MWL"],
+["Thailand","Bangkok",13.756,100.502,"Asia/Bangkok","MWL"],
+["Togo","Lomé",6.131,1.223,"Africa/Lome","MWL"],
+["Trinidad and Tobago","Port of Spain",10.654,-61.502,"America/Port_of_Spain","ISNA"],
+["Tunisia","Tunis",36.806,10.181,"Africa/Tunis","MWL"],
+["Turkey","Ankara",39.934,32.860,"Europe/Istanbul","Turkey"],
+["Turkey","Istanbul",41.008,28.978,"Europe/Istanbul","Turkey"],
+["Turkmenistan","Ashgabat",37.960,58.326,"Asia/Ashgabat","MWL"],
+["Uganda","Kampala",0.347,32.582,"Africa/Kampala","MWL"],
+["Ukraine","Kyiv",50.450,30.523,"Europe/Kiev","MWL"],
+["United Arab Emirates","Abu Dhabi",24.454,54.377,"Asia/Dubai","Dubai"],
+["United Arab Emirates","Dubai",25.205,55.271,"Asia/Dubai","Dubai"],
+["United Kingdom","London",51.507,-0.128,"Europe/London","MWL"],
+["United Kingdom","Manchester",53.481,-2.243,"Europe/London","MWL"],
+["United Kingdom","Birmingham",52.486,-1.890,"Europe/London","MWL"],
+["United Kingdom","Bradford",53.795,-1.759,"Europe/London","MWL"],
+["United Kingdom","Leicester",52.637,-1.135,"Europe/London","MWL"],
+["United Kingdom","Glasgow",55.864,-4.252,"Europe/London","MWL"],
+["United Kingdom","Cardiff",51.481,-3.179,"Europe/London","MWL"],
+["United States","New York",40.713,-74.006,"America/New_York","ISNA"],
+["United States","Washington DC",38.907,-77.037,"America/New_York","ISNA"],
+["United States","Chicago",41.878,-87.630,"America/Chicago","ISNA"],
+["United States","Houston",29.760,-95.370,"America/Chicago","ISNA"],
+["United States","Detroit",42.331,-83.046,"America/Detroit","ISNA"],
+["United States","Los Angeles",34.052,-118.244,"America/Los_Angeles","ISNA"],
+["Uruguay","Montevideo",-34.901,-56.164,"America/Montevideo","MWL"],
+["Uzbekistan","Tashkent",41.299,69.240,"Asia/Tashkent","MWL"],
+["Venezuela","Caracas",10.481,-66.904,"America/Caracas","MWL"],
+["Vietnam","Hanoi",21.028,105.854,"Asia/Ho_Chi_Minh","MWL"],
+["Yemen","Sana'a",15.369,44.191,"Asia/Aden","MWL"],
+["Zambia","Lusaka",-15.388,28.323,"Africa/Lusaka","MWL"],
+["Zimbabwe","Harare",-17.825,31.034,"Africa/Harare","MWL"],
+].map(([country, city, lat, lng, tz, method, asr]) => ({ id: country + '|' + city, country, city, lat, lng, tz, method, asr: asr || 'Standard' }));
+
+/* ---------- Para (Juz) names ---------- */
+const JUZ = ["Alif Lam Mim","Sayaqul","Tilka r-Rusul","Lan Tanalu","Wal Muhsanat","La Yuhibbullah","Wa Idha Sami'u","Wa Law Annana","Qal al-Mala'u","Wa'lamu","Ya'tadhirun","Wa Ma min Dabbah","Wa Ma Ubarri'u","Rubama","Subhanalladhi","Qal Alam","Iqtaraba","Qad Aflaha","Wa Qalalladhina","Amman Khalaq","Utlu Ma Uhiya","Wa Man Yaqnut","Wa Mali","Faman Azlam","Ilayhi Yuraddu","Ha Mim","Qala Fama Khatbukum","Qad Sami Allah","Tabarakalladhi","Amma Yatasa'alun"];
+
+/* ---------- helpers ---------- */
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const bnNum = n => String(n).replace(/\d/g, d => '০১২৩৪৫৬৭৮৯'[d]);
+const store = {
+  get(k, def) { try { const v = localStorage.getItem('qb.' + k); return v == null ? def : JSON.parse(v); } catch (e) { return def; } },
+  set(k, v) { try { localStorage.setItem('qb.' + k, JSON.stringify(v)); } catch (e) {} },
+};
+
+/* ---------- settings ---------- */
+const THEMES = {
+  cream: { label: 'Cream', bg: '#FBF6E9', fg: '#2B2A28', muted: '#6B675F', card: '#FFFDF6', line: '#E6DCC4', accent: '#1F6F5C', soft: '#DCEFE7', hl: '#FFF0B8' },
+  blue:  { label: 'Blue',  bg: '#E6F0F8', fg: '#1F2A36', muted: '#56636F', card: '#F4F9FD', line: '#C8D9E8', accent: '#1D5C8C', soft: '#D4E6F5', hl: '#FFF3C4' },
+  green: { label: 'Green', bg: '#E8F3EA', fg: '#22302A', muted: '#56665D', card: '#F5FBF6', line: '#CBE0D0', accent: '#2C6B45', soft: '#D3EBDB', hl: '#FFF3C4' },
+  peach: { label: 'Peach', bg: '#FBEDE2', fg: '#33281F', muted: '#6E5F52', card: '#FEF7F1', line: '#EED7C5', accent: '#8A4B22', soft: '#F4DECF', hl: '#FFF0B8' },
+  yellow:{ label: 'Yellow',bg: '#FBF5CF', fg: '#2E2B1C', muted: '#68634A', card: '#FFFCE8', line: '#E9DFA6', accent: '#5D5A12', soft: '#EFE8B5', hl: '#FFFFFF' },
+  dark:  { label: 'Dark',  bg: '#1E1F22', fg: '#ECE8DF', muted: '#A8A39A', card: '#2A2B2F', line: '#3C3D42', accent: '#7CC7AE', soft: '#2E4A41', hl: '#3B3A2A' },
+};
+const DEFAULTS = {
+  theme: 'cream', scale: 1.15, lh: 1.9, wide: false, uiFont: 'Lexend', bnFont: 'Noto Sans Bengali', arFont: 'Scheherazade New', arMult: 1,
+  showAr: true, showBn: true, showEn: true, ruler: false,
+  placeId: 'United Kingdom|Manchester', custom: null, method: null, asr: null, highLat: 'AngleBased', h24: false,
+};
+let S = Object.assign({}, DEFAULTS, store.get('settings', {}));
+const save = () => store.set('settings', S);
+
+function applySettings() {
+  const t = THEMES[S.theme] || THEMES.cream, r = document.documentElement.style;
+  r.setProperty('--bg', t.bg); r.setProperty('--fg', t.fg); r.setProperty('--muted', t.muted); r.setProperty('--card', t.card);
+  r.setProperty('--line', t.line); r.setProperty('--accent', t.accent); r.setProperty('--accent-soft', t.soft); r.setProperty('--hl', t.hl);
+  r.setProperty('--scale', S.scale); r.setProperty('--lh', S.lh); r.setProperty('--ar-mult', S.arMult);
+  r.setProperty('--ls', S.wide ? '0.05em' : '0em'); r.setProperty('--ws', S.wide ? '0.16em' : '0em');
+  r.setProperty('--ui-font', `'${S.uiFont}',system-ui,sans-serif`);
+  r.setProperty('--bn-font', `'${S.bnFont}','Noto Sans Bengali',sans-serif`);
+  r.setProperty('--ar-font', `'${S.arFont}','Scheherazade New',serif`);
+  document.querySelector('meta[name=theme-color]').setAttribute('content', t.bg);
+  $('#ruler').classList.toggle('hidden', !(S.ruler && state.view === 'reader'));
+}
+
+/* ---------- offline store (IndexedDB) ---------- */
+const DB = {
+  p: null,
+  open() {
+    if (this.p) return this.p;
+    this.p = new Promise(res => {
+      setTimeout(() => res(null), 2500); // never let storage problems block the app
+      try {
+        const r = indexedDB.open('quran-bangla', 2);
+        r.onupgradeneeded = () => { const d = r.result; for (const n of ['juz', 'kv']) if (!d.objectStoreNames.contains(n)) d.createObjectStore(n); };
+        r.onsuccess = () => res(r.result);
+        r.onerror = () => res(null);
+      } catch (e) { res(null); }
+    });
+    return this.p;
+  },
+  async run(store, mode, fn) {
+    const db = await this.open(); if (!db) return null;
+    return new Promise(res => { setTimeout(() => res(null), 2500); try { const q = fn(db.transaction(store, mode).objectStore(store)); q.onsuccess = () => res(q.result); q.onerror = () => res(null); } catch (e) { res(null); } });
+  },
+  get(k, store = 'juz') { return this.run(store, 'readonly', s => s.get(k)); },
+  set(k, v, store = 'juz') { return this.run(store, 'readwrite', s => s.put(v, k)); },
+  async keys(store = 'juz') { return (await this.run(store, 'readonly', s => s.getAllKeys())) || []; },
+};
+
+/* ---------- Quran data (Al-Quran Cloud API) ---------- */
+const API = 'https://api.alquran.cloud/v1/juz/';
+async function getJSON(url) {
+  const r = await fetch(url);
+  if (!r.ok) throw new Error('HTTP ' + r.status);
+  const j = await r.json();
+  if (j.code !== 200 || !j.data || !Array.isArray(j.data.ayahs)) throw new Error('Bad response');
+  return j;
+}
+async function loadJuz(n) {
+  const cached = await DB.get(n);
+  if (cached && cached.verses && cached.verses.length) return cached;
+  const [ar, bn] = await Promise.all([getJSON(API + n + '/quran-uthmani'), getJSON(API + n + '/bn.bengali')]);
+  const bnMap = new Map(bn.data.ayahs.map(a => [a.number, a.text]));
+  const surahs = {};
+  const verses = ar.data.ayahs.map(a => {
+    const s = a.surah || {};
+    if (!surahs[s.number]) surahs[s.number] = { n: s.number, name: s.name, en: s.englishName, tr: s.englishNameTranslation, count: s.numberOfAyahs, type: s.revelationType };
+    return { id: a.number, s: s.number, a: a.numberInSurah, ar: String(a.text || '').replace(/^﻿/, ''), bn: bnMap.get(a.number) || '', sajda: !!a.sajda };
+  });
+  const ed = bn.data.edition || {};
+  const data = { n, verses, surahs, credit: [ed.englishName, ed.name].filter(Boolean).join(' · ') };
+  await DB.set(n, data);
+  return data;
+}
+
+/* Separate the Bismillah that the Uthmani text prefixes to verse 1 of each surah (except 1 and 9) */
+const plain = s => s.replace(/[ً-ٰٟۖ-ۭـ]/g, '').replace(/[ٱآأإ]/g, 'ا');
+function splitBism(v) {
+  if (v.a !== 1 || v.s === 1 || v.s === 9) return [null, v.ar];
+  const w = v.ar.split(/\s+/);
+  if (w.length > 4 && plain(w[0]).startsWith('بسم') && plain(w[1]).includes('له')) return [w.slice(0, 4).join(' '), w.slice(4).join(' ')];
+  return [null, v.ar];
+}
+
+/* ---------- app state & routing ---------- */
+const state = { view: 'quran', juz: null, data: null, focus: false, focusIdx: 0, observer: null };
+
+function setTop({ title, sub, back, reader }) {
+  $('#title').innerHTML = title + (sub ? `<small class="bn">${sub}</small>` : '');
+  $('#backBtn').classList.toggle('hidden', !back);
+  $('#aaBtn').classList.toggle('hidden', !reader);
+  $('#focusBtn').classList.toggle('hidden', !reader);
+}
+function selectTab(tab) {
+  document.querySelectorAll('#tabs button').forEach(b => b.classList.toggle('on', b.dataset.tab === tab));
+}
+function go(view, arg) {
+  if (state.observer) { state.observer.disconnect(); state.observer = null; }
+  state.view = view; state.focus = false;
+  $('#focusbar').classList.add('hidden');
+  $('#view').classList.remove('focus-on');
+  applySettings();
+  window.scrollTo(0, 0);
+  if (view === 'quran') { selectTab('quran'); renderList(); }
+  if (view === 'reader') { selectTab('quran'); renderReader(arg); }
+  if (view === 'prayer') { selectTab('prayer'); renderPrayer(); }
+  if (view === 'settings') { selectTab('settings'); renderSettings(); }
+  if (view === 'hadith') { selectTab('hadith'); renderBooks(); }
+  if (view === 'book') { selectTab('hadith'); renderBook(arg); }
+  if (view === 'ramadan') { selectTab('ramadan'); renderRamadan(); }
+  const hash = view === 'reader' ? 'para-' + arg.juz : view === 'book' ? 'bukhari-' + arg.n : view;
+  try { history.replaceState(null, '', '#' + hash); } catch (e) {}
+}
+
+/* ---------- Quran list ---------- */
+async function renderList() {
+  setTop({ title: 'Quran · <span class="bn">কুরআন</span>', sub: '৩০ পারা · আরবি ও বাংলা অনুবাদ' });
+  const last = store.get('last', null);
+  const have = new Set(await DB.keys());
+  let h = `<div class="card" style="text-align:center;background:var(--accent-soft)"><div style="font-size:1.35em;font-weight:600;color:var(--accent)">Path of Guidance</div><div class="bn" style="font-size:1.15em">হেদায়েতের পথ</div></div>`;
+  if (last) h += `<button class="card continue" id="cont"><span><b>Continue reading</b><br><span class="bn">পড়া চালিয়ে যান</span> — Para ${last.juz} · <span class="bn">পারা ${bnNum(last.juz)}</span><br><span class="muted">Surah ${last.s}, Ayah ${last.a}</span></span><span style="font-size:1.6em">›</span></button>`;
+  h += `<div class="paras">` + JUZ.map((nm, i) => `<button class="para" data-juz="${i + 1}"><span class="num">${i + 1} <span class="bn" style="font-size:.7em">· পারা ${bnNum(i + 1)}</span></span><span class="nm">${esc(nm)}</span><span class="dl">${have.has(i + 1) ? '✓ Saved for offline' : ''}</span></button>`).join('') + `</div>`;
+  $('#view').innerHTML = h;
+  $('#view').querySelectorAll('.para').forEach(b => b.onclick = () => go('reader', { juz: +b.dataset.juz }));
+  if (last) $('#cont').onclick = () => go('reader', { juz: last.juz, id: last.id });
+}
+
+/* ---------- Reader ---------- */
+async function renderReader({ juz, id, s: jumpS, a: jumpA }) {
+  state.juz = juz;
+  setTop({ title: `Para ${juz} · <span class="bn">পারা ${bnNum(juz)}</span>`, sub: JUZ[juz - 1], back: true, reader: true });
+  $('#view').innerHTML = `<div class="loading"><div class="spinner"></div>Loading Para ${juz}…<br><span class="bn">পারা ${bnNum(juz)} লোড হচ্ছে…</span></div>`;
+  let data;
+  try { data = await loadJuz(juz); }
+  catch (e) {
+    $('#view').innerHTML = `<div class="card"><b>Could not load this Para.</b><p class="bn">পারাটি লোড করা যায়নি। ইন্টারনেট সংযোগ দেখে আবার চেষ্টা করুন।</p><p class="note">Please check your internet connection. Once a Para has loaded once, it is saved and works offline.</p><button class="btn" id="retry">Try again · আবার চেষ্টা</button></div>`;
+    $('#retry').onclick = () => renderReader({ juz, id, s: jumpS, a: jumpA });
+    return;
+  }
+  if (state.view !== 'reader' || state.juz !== juz) return;
+  state.data = data;
+  let h = '', first = true;
+  for (const v of data.verses) {
+    if (v.a === 1 || first) {
+      const s = data.surahs[v.s] || {};
+      h += `<div class="surah-head"><div class="ar" lang="ar" dir="rtl">${esc(s.name || '')}</div><div class="en">${s.n}. ${esc(s.en || '')}</div><div class="muted">${esc(s.tr || '')} · ${s.count} ayahs${v.a !== 1 ? ' · continued from Ayah ' + v.a : ''}</div></div>`;
+    }
+    first = false;
+    const [bism, rest] = splitBism(v);
+    if (bism && S.showAr) h += `<div class="bism" lang="ar">${esc(bism)}</div>`;
+    h += `<article class="verse" id="v${v.id}" data-id="${v.id}" data-s="${v.s}" data-a="${v.a}">
+      <span class="ref">${v.s}:${v.a}</span>${v.sajda ? '<span class="sajda">۩ Sajdah · সিজদা</span>' : ''}
+      ${S.showAr ? `<div class="ar" lang="ar">${esc(rest)}</div>` : ''}
+      ${S.showBn ? `<div class="tr" lang="bn">${esc(v.bn)}</div>` : ''}
+    </article>`;
+  }
+  h += `<div class="card note">Arabic: Uthmani script. Bangla translation: ${esc(data.credit || 'bn.bengali')}. Text from the Al-Quran Cloud API (alquran.cloud).</div>`;
+  h += `<div class="row" style="justify-content:space-between">${juz > 1 ? `<button class="btn ghost" id="prevJ">‹ Para ${juz - 1}</button>` : '<span></span>'}${juz < 30 ? `<button class="btn" id="nextJ">Para ${juz + 1} ›</button>` : ''}</div>`;
+  $('#view').innerHTML = h;
+  if ($('#prevJ')) $('#prevJ').onclick = () => go('reader', { juz: juz - 1 });
+  if ($('#nextJ')) $('#nextJ').onclick = () => go('reader', { juz: juz + 1 });
+  $('#view').querySelectorAll('.verse').forEach((el, i) => el.onclick = () => { if (state.focus) setFocus(i); });
+  const target = jumpS ? $(`#view .verse[data-s="${jumpS}"][data-a="${jumpA}"]`) : (id && document.getElementById('v' + id));
+  if (target) { target.scrollIntoView(); if (jumpS) { target.style.borderColor = 'var(--accent)'; target.style.background = 'var(--hl)'; } }
+  // remember position
+  const io = new IntersectionObserver(entries => {
+    const vis = entries.filter(e => e.isIntersecting).map(e => e.target);
+    if (!vis.length || state.focus) return;
+    const el = vis[0];
+    store.set('last', { juz, id: +el.dataset.id, s: +el.dataset.s, a: +el.dataset.a });
+  }, { rootMargin: '-25% 0px -65% 0px' });
+  $('#view').querySelectorAll('.verse').forEach(el => io.observe(el));
+  state.observer = io;
+}
+function verses() { return [...$('#view').querySelectorAll('.verse')]; }
+function setFocus(i) {
+  const vs = verses(); if (!vs.length) return;
+  state.focusIdx = Math.max(0, Math.min(vs.length - 1, i));
+  vs.forEach((el, j) => el.classList.toggle('is-focus', j === state.focusIdx));
+  const el = vs[state.focusIdx];
+  el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  if (state.view === 'reader') store.set('last', { juz: state.juz, id: +el.dataset.id, s: +el.dataset.s, a: +el.dataset.a });
+}
+function toggleFocus() {
+  state.focus = !state.focus;
+  $('#view').classList.toggle('focus-on', state.focus);
+  $('#focusbar').classList.toggle('hidden', !state.focus);
+  $('#focusBtn').style.background = state.focus ? 'var(--accent-soft)' : '';
+  if (state.focus) {
+    const vs = verses(), mid = window.innerHeight * 0.35;
+    let idx = vs.findIndex(el => el.getBoundingClientRect().bottom > mid);
+    setFocus(idx < 0 ? 0 : idx);
+  }
+}
+
+/* ---------- display settings (shared by sheet & settings tab) ---------- */
+function displayControls() {
+  const fontOpt = (arr, cur) => arr.map(f => `<option ${f === cur ? 'selected' : ''}>${f}</option>`).join('');
+  return `
+  <label class="f">Background colour · <span class="bn">পটভূমির রং</span></label>
+  <div class="swatches">${Object.entries(THEMES).map(([k, t]) => `<button class="swatch ${S.theme === k ? 'on' : ''}" data-theme="${k}" style="background:${t.bg};color:${t.fg}">${t.label}</button>`).join('')}</div>
+  <label class="f">Text size · <span class="bn">লেখার আকার</span></label>
+  <input type="range" min="0.9" max="2" step="0.05" value="${S.scale}" data-k="scale">
+  <label class="f">Arabic size · <span class="bn">আরবি লেখার আকার</span></label>
+  <input type="range" min="0.8" max="1.8" step="0.05" value="${S.arMult}" data-k="arMult">
+  <label class="f">Line spacing · <span class="bn">লাইনের দূরত্ব</span></label>
+  <input type="range" min="1.5" max="2.6" step="0.1" value="${S.lh}" data-k="lh">
+  <div class="toggle"><span>Extra letter &amp; word spacing<br><span class="bn muted">অক্ষর ও শব্দের মাঝে বেশি জায়গা</span></span><input type="checkbox" data-b="wide" ${S.wide ? 'checked' : ''}></div>
+  <div class="toggle"><span>Reading ruler (dims the rest of the page)<br><span class="bn muted">পড়ার রুলার</span></span><input type="checkbox" data-b="ruler" ${S.ruler ? 'checked' : ''}></div>
+  <div class="toggle"><span>Show Arabic · <span class="bn">আরবি দেখান</span></span><input type="checkbox" data-b="showAr" ${S.showAr ? 'checked' : ''}></div>
+  <div class="toggle"><span>Show Bangla · <span class="bn">বাংলা অনুবাদ দেখান</span></span><input type="checkbox" data-b="showBn" ${S.showBn ? 'checked' : ''}></div>
+  <div class="toggle"><span>Show English (Hadith) · <span class="bn">ইংরেজি দেখান</span></span><input type="checkbox" data-b="showEn" ${S.showEn ? 'checked' : ''}></div>
+  <label class="f">Bangla font · <span class="bn">বাংলা ফন্ট</span></label>
+  <select data-k="bnFont">${fontOpt(['Noto Sans Bengali', 'Hind Siliguri'], S.bnFont)}</select>
+  <label class="f">English font</label>
+  <select data-k="uiFont">${fontOpt(['Lexend', 'Atkinson Hyperlegible', 'system-ui'], S.uiFont)}</select>
+  <label class="f">Arabic font · <span class="bn">আরবি ফন্ট</span></label>
+  <select data-k="arFont">${fontOpt(['Scheherazade New', 'Amiri'], S.arFont)}</select>
+  <div class="card preview"><div class="tr bn" style="line-height:var(--lh)">নমুনা লেখা — এভাবে বাংলা অনুবাদ দেখাবে।</div></div>`;
+}
+function wireDisplay(root, onChange) {
+  root.querySelectorAll('[data-theme]').forEach(b => b.onclick = () => { S.theme = b.dataset.theme; save(); applySettings(); root.querySelectorAll('[data-theme]').forEach(x => x.classList.toggle('on', x === b)); });
+  root.querySelectorAll('input[type=range][data-k], select[data-k]').forEach(el => el.oninput = el.onchange = () => {
+    S[el.dataset.k] = el.type === 'range' ? +el.value : el.value; save(); applySettings();
+  });
+  root.querySelectorAll('input[data-b]').forEach(el => el.onchange = () => {
+    S[el.dataset.b] = el.checked; save(); applySettings();
+    if (['showAr', 'showBn', 'showEn'].includes(el.dataset.b)) onChange && onChange(true);
+  });
+}
+function openSheet(html, wire) {
+  const back = document.createElement('div');
+  back.className = 'sheet-back';
+  back.innerHTML = `<div class="sheet" role="dialog"><div class="grab"></div>${html}<button class="btn" style="width:100%;margin-top:18px" data-close>Done · <span class="bn">ঠিক আছে</span></button></div>`;
+  document.body.appendChild(back);
+  const close = () => back.remove();
+  back.onclick = e => { if (e.target === back) close(); };
+  back.querySelector('[data-close]').onclick = close;
+  wire && wire(back.querySelector('.sheet'), close);
+  return close;
+}
+
+/* ---------- Prayer ---------- */
+const PRAYERS = [
+  ['fajr', 'Fajr', 'ফজর'], ['sunrise', 'Sunrise', 'সূর্যোদয়'], ['dhuhr', 'Dhuhr', 'যোহর'],
+  ['asr', 'Asr', 'আসর'], ['maghrib', 'Maghrib', 'মাগরিব'], ['isha', 'Isha', 'এশা'],
+];
+function currentPlace() {
+  if (S.custom) return S.custom;
+  return PLACES.find(p => p.id === S.placeId) || PLACES.find(p => p.id === DEFAULTS.placeId);
+}
+function opts(place) { return { method: S.method || place.method, asr: S.asr || place.asr, highLat: S.highLat }; }
+function fmt(date, tz) {
+  if (!date) return '—';
+  return new Intl.DateTimeFormat('en-GB', { hour: 'numeric', minute: '2-digit', hour12: !S.h24, timeZone: tz }).format(date).replace(/\s?(am|pm)/i, m => ' ' + m.trim().toUpperCase());
+}
+function addDays({ y, m, d }, n) { const t = new Date(Date.UTC(y, m - 1, d + n)); return { y: t.getUTCFullYear(), m: t.getUTCMonth() + 1, d: t.getUTCDate() }; }
+let prayerTimer = null;
+
+function renderPrayer() {
+  setTop({ title: 'Prayer times · <span class="bn">নামাজের সময়</span>', sub: '' });
+  const place = currentPlace(), o = opts(place), tz = place.tz;
+  const today = PT.localYMD(tz);
+  const times = PT.forDate(today.y, today.m, today.d, place, o);
+  const tomorrow = addDays(today, 1);
+  const tTimes = PT.forDate(tomorrow.y, tomorrow.m, tomorrow.d, place, o);
+  const now = new Date();
+  const five = ['fajr', 'dhuhr', 'asr', 'maghrib', 'isha'];
+  let nextKey = five.find(k => times[k] && times[k] > now), nextTime = nextKey ? times[nextKey] : tTimes.fajr;
+  const nextToday = !!nextKey;
+  if (!nextKey) nextKey = 'fajr';
+  const mins = Math.max(0, Math.round((nextTime - now) / 60000));
+  const left = `${Math.floor(mins / 60)}h ${mins % 60}m`;
+  const nk = PRAYERS.find(p => p[0] === nextKey);
+  let dateStr = new Intl.DateTimeFormat('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: tz }).format(now);
+  let hijri = '';
+  try { hijri = new Intl.DateTimeFormat('en-GB-u-ca-islamic-umalqura', { day: 'numeric', month: 'long', year: 'numeric', timeZone: tz }).format(now); } catch (e) {}
+  const week = [...Array(7)].map((_, i) => { const dd = addDays(today, i); return { dd, t: PT.forDate(dd.y, dd.m, dd.d, place, o) }; });
+  const dayName = dd => new Intl.DateTimeFormat('en-GB', { weekday: 'short', day: 'numeric', timeZone: 'UTC' }).format(new Date(Date.UTC(dd.y, dd.m - 1, dd.d, 12)));
+
+  $('#view').innerHTML = `
+  <div class="card loc"><div><div class="place">${esc(place.city)}</div><div class="muted">${esc(place.country)}</div></div>
+    <button class="btn ghost" id="chg">Change · <span class="bn">বদলান</span></button></div>
+  <div class="muted" style="margin:0 4px 12px">${esc(dateStr)}${hijri ? ' · ' + esc(hijri) : ''}</div>
+  <div class="card next"><div class="label">Next prayer · <span class="bn">পরবর্তী নামাজ</span></div>
+    <div class="big">${nk[1]} · <span class="bn">${nk[2]}</span></div>
+    <div style="font-size:1.2em">${nextToday ? '' : 'Tomorrow · '}${fmt(nextTime, tz)} — in ${left}</div></div>
+  <ul class="ptimes">${PRAYERS.map(([k, en, bn]) => `<li class="${k === 'sunrise' ? 'sun' : ''} ${nextToday && k === nextKey ? 'is-next' : ''}">
+    <span class="nm"><b>${en}</b> · <span class="bn">${bn}</span>${k === 'sunrise' ? '<small>End of Fajr time · ফজরের শেষ সময়</small>' : ''}</span><span class="t">${fmt(times[k], tz)}</span></li>`).join('')}</ul>
+  <h2>Next 7 days · <span class="bn">আগামী ৭ দিন</span></h2>
+  <div class="weekwrap"><table class="week"><tr><th></th><th>Fajr</th><th>Sunrise</th><th>Dhuhr</th><th>Asr</th><th>Maghrib</th><th>Isha</th></tr>
+  ${week.map(({ dd, t }) => `<tr><td>${dayName(dd)}</td>${PRAYERS.map(([k]) => `<td>${fmt(t[k], tz)}</td>`).join('')}</tr>`).join('')}</table></div>
+  <h2>Calculation · <span class="bn">হিসাবের পদ্ধতি</span></h2>
+  <div class="card">
+    <label class="f" style="margin-top:0">Method</label>
+    <select id="mth">${Object.entries(PT.METHODS).map(([k, m]) => `<option value="${k}" ${o.method === k ? 'selected' : ''}>${m.name}${k === place.method ? ' (default here)' : ''}</option>`).join('')}</select>
+    <label class="f">Asr</label>
+    <div class="seg" id="asrSeg"><button data-v="Standard" class="${o.asr === 'Standard' ? 'on' : ''}">Standard (Shafi'i)</button><button data-v="Hanafi" class="${o.asr === 'Hanafi' ? 'on' : ''}">Hanafi</button></div>
+    <label class="f">High-latitude rule</label>
+    <select id="hl">${[['AngleBased', 'Angle-based (recommended)'], ['OneSeventh', 'One-seventh of the night'], ['NightMiddle', 'Middle of the night']].map(([v, l]) => `<option value="${v}" ${S.highLat === v ? 'selected' : ''}>${l}</option>`).join('')}</select>
+    <label class="f">Clock</label>
+    <div class="seg" id="clk"><button data-v="12" class="${!S.h24 ? 'on' : ''}">12-hour</button><button data-v="24" class="${S.h24 ? 'on' : ''}">24-hour</button></div>
+    <p class="note">Times are calculated from the sun's position, so they can differ by a few minutes from your local mosque's timetable. Please follow your mosque if it is different.<br><span class="bn">সময়গুলো হিসাব করে বের করা — স্থানীয় মসজিদের সময়সূচির সাথে কয়েক মিনিট পার্থক্য হতে পারে।</span></p>
+  </div>`;
+  $('#chg').onclick = openPlacePicker;
+  $('#mth').onchange = e => { S.method = e.target.value === place.method ? null : e.target.value; save(); renderPrayer(); };
+  $('#hl').onchange = e => { S.highLat = e.target.value; save(); renderPrayer(); };
+  $('#asrSeg').querySelectorAll('button').forEach(b => b.onclick = () => { S.asr = b.dataset.v === place.asr ? null : b.dataset.v; save(); renderPrayer(); });
+  $('#clk').querySelectorAll('button').forEach(b => b.onclick = () => { S.h24 = b.dataset.v === '24'; save(); renderPrayer(); });
+  clearTimeout(prayerTimer);
+  prayerTimer = setTimeout(() => { if (state.view === 'prayer' && !document.querySelector('.sheet-back')) renderPrayer(); }, 30000);
+}
+
+function refreshPlaceView() { state.view === 'ramadan' ? renderRamadan() : renderPrayer(); }
+function openPlacePicker() {
+  const countries = new Set(PLACES.map(p => p.country)).size;
+  openSheet(`
+    <h2 style="margin-top:0">Choose location · <span class="bn">অবস্থান বেছে নিন</span></h2>
+    <button class="btn" id="geo" style="width:100%">📍 Use my location · <span class="bn">আমার অবস্থান</span></button>
+    <p class="note" id="geoMsg"></p>
+    <input type="search" id="q" placeholder="Search country or city (${countries} countries)" autocomplete="off">
+    <ul class="citylist" id="cl"></ul>`, (root, close) => {
+    const list = root.querySelector('#cl'), q = root.querySelector('#q');
+    const draw = () => {
+      const s = q.value.trim().toLowerCase();
+      const items = PLACES.filter(p => !s || p.country.toLowerCase().includes(s) || p.city.toLowerCase().includes(s));
+      list.innerHTML = items.map(p => `<li><button data-id="${esc(p.id)}"><b>${esc(p.city)}</b> — ${esc(p.country)}</button></li>`).join('') || '<li class="muted" style="padding:14px">No match</li>';
+      list.querySelectorAll('button').forEach(b => b.onclick = () => { S.placeId = b.dataset.id; S.custom = null; S.method = null; S.asr = null; save(); close(); refreshPlaceView(); });
+    };
+    q.oninput = draw; draw();
+    root.querySelector('#geo').onclick = () => {
+      const msg = root.querySelector('#geoMsg');
+      if (!navigator.geolocation) { msg.textContent = 'Location is not available on this device.'; return; }
+      msg.textContent = 'Finding your location…';
+      navigator.geolocation.getCurrentPosition(pos => {
+        const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
+        const lat = pos.coords.latitude, lng = pos.coords.longitude;
+        // pick nearest listed place for sensible default method
+        let best = PLACES[0], bd = 1e9;
+        for (const p of PLACES) { const d = (p.lat - lat) ** 2 + ((p.lng - lng) * Math.cos(lat * Math.PI / 180)) ** 2; if (d < bd) { bd = d; best = p; } }
+        S.custom = { id: 'custom', city: 'My location', country: `${lat.toFixed(3)}, ${lng.toFixed(3)} · near ${best.city}`, lat, lng, tz, method: best.method, asr: best.asr };
+        S.method = null; S.asr = null; save(); close(); refreshPlaceView();
+      }, () => { msg.textContent = 'Could not get your location. Please allow location access for this site in Settings, or pick a city below.'; }, { timeout: 15000 });
+    };
+  });
+}
+
+/* ---------- Settings tab ---------- */
+async function renderSettings() {
+  setTop({ title: 'Settings · <span class="bn">সেটিংস</span>', sub: 'Dyslexia-friendly reading options' });
+  const have = (await DB.keys()).length;
+  $('#view').innerHTML = `
+  <div class="card">${displayControls()}</div>
+  <h2>Offline reading · <span class="bn">অফলাইনে পড়া</span></h2>
+  <div class="card">
+    <p style="margin-top:0"><b id="haveN">${have}</b> of 30 Paras saved on this device.<br><span class="bn">অফলাইনে পড়ার জন্য সব পারা ডাউনলোড করুন।</span></p>
+    <button class="btn" id="dlAll">Download all 30 Paras</button>
+    <div class="progress"><div id="bar" style="width:${have / 30 * 100}%"></div></div>
+    <p class="note" id="dlMsg"></p>
+  </div>
+  <h2>Add to iPhone home screen</h2>
+  <div class="card note">In Safari, tap the Share button, then <b>Add to Home Screen</b>. The app then opens full screen with its own icon.<br><span class="bn">Safari-তে Share বোতাম চাপুন, তারপর “Add to Home Screen” বেছে নিন।</span></div>
+  <div class="card note">Arabic text: Uthmani script. Bangla translation and Arabic text are downloaded from the Al-Quran Cloud API (alquran.cloud). Prayer times are calculated on your device. Sahih al-Bukhari (Arabic, English by Muhsin Khan, and Bangla) is downloaded from the open Hadith API by Fawaz Ahmed (github.com/fawazahmed0/hadith-api).</div>`;
+  wireDisplay($('#view'));
+  $('#dlAll').onclick = async () => {
+    const btn = $('#dlAll'); btn.disabled = true;
+    let ok = 0, fail = 0;
+    for (let n = 1; n <= 30; n++) {
+      $('#dlMsg').textContent = `Downloading Para ${n}…`;
+      try { await loadJuz(n); ok++; } catch (e) { fail++; }
+      const k = (await DB.keys()).length;
+      $('#bar').style.width = (k / 30 * 100) + '%'; $('#haveN').textContent = k;
+    }
+    $('#dlMsg').textContent = fail ? `${fail} Para(s) failed — check your connection and tap again.` : 'All 30 Paras saved. You can now read offline. · সব পারা সংরক্ষিত হয়েছে।';
+    btn.disabled = false;
+  };
+}
+
+/* ---------- Hadith: Sahih al-Bukhari (open Hadith API by Fawaz Ahmed) ---------- */
+const HAPI = 'https://cdn.jsdelivr.net/gh/fawazahmed0/hadith-api@1/editions/';
+// Fallback labels for the 97 books; the title stored in the hadith data is shown once a book has loaded.
+const BUKHARI_BOOKS = ["Revelation","Belief","Knowledge","Ablutions (Wudu')","Bathing (Ghusl)","Menstrual Periods","Tayammum","Prayers (Salat)","Times of the Prayers","Call to Prayers (Adhan)","Friday Prayer","Fear Prayer","The Two Festivals (Eids)","Witr Prayer","Invoking Allah for Rain (Istisqa)","Eclipses","Prostration During Recital of Qur'an","Shortening the Prayers","Prayer at Night (Tahajjud)","Virtues of Prayer at Masjid Makkah and Madinah","Actions while Praying","Forgetfulness in Prayer","Funerals (Al-Jana'iz)","Obligatory Charity Tax (Zakat)","Hajj (Pilgrimage)","'Umrah (Minor Pilgrimage)","Pilgrims Prevented from Completing the Pilgrimage","Penalty of Hunting while on Pilgrimage","Virtues of Madinah","Fasting","Praying at Night in Ramadan (Taraweeh)","Virtues of the Night of Qadr","Retiring to a Mosque (I'tikaf)","Sales and Trade","Sales in which a Price is Paid for Goods to be Delivered Later (As-Salam)","Shuf'a","Hiring","Transference of a Debt (Al-Hawala)","Kafalah","Representation, Authorization, Business by Proxy","Agriculture","Distribution of Water","Loans, Payment of Loans, Freezing of Property, Bankruptcy","Khusoomaat","Lost Things Picked up (Luqatah)","Oppressions","Partnership","Mortgaging","Manumission of Slaves","Makaatib","Gifts","Witnesses","Peacemaking","Conditions","Wills and Testaments (Wasaya)","Fighting for the Cause of Allah (Jihad)","One-fifth of Booty (Khumus)","Jizyah and Mawaada'ah","Beginning of Creation","Prophets","Virtues and Merits of the Prophet and his Companions","Companions of the Prophet","Merits of the Helpers in Madinah (Ansar)","Military Expeditions led by the Prophet (Al-Maghazi)","Prophetic Commentary on the Qur'an (Tafsir)","Virtues of the Qur'an","Wedlock, Marriage (Nikah)","Divorce","Supporting the Family","Food, Meals","Sacrifice on Occasion of Birth ('Aqiqa)","Hunting, Slaughtering","Al-Adha Festival Sacrifice (Adahi)","Drinks","Patients","Medicine","Dress","Good Manners and Form (Al-Adab)","Asking Permission","Invocations","To make the Heart Tender (Ar-Riqaq)","Divine Will (Al-Qadar)","Oaths and Vows","Expiation for Unfulfilled Oaths","Laws of Inheritance (Al-Fara'id)","Limits and Punishments set by Allah (Hudud)","Blood Money (Ad-Diyat)","Dealing with Apostates","Saying Something under Compulsion (Ikrah)","Tricks","Interpretation of Dreams","Afflictions and the End of the World","Judgments (Ahkam)","Wishes","Accepting Information Given by a Truthful Person","Holding Fast to the Qur'an and Sunnah","Oneness, Uniqueness of Allah (Tawheed)"];
+const bookTitle = n => (store.get('bookTitles', {})[n]) || BUKHARI_BOOKS[n - 1] || 'Book ' + n;
+
+async function getHadithSection(ed, n) {
+  const r = await fetch(HAPI + ed + '/sections/' + n + '.json');
+  if (!r.ok) throw new Error('HTTP ' + r.status);
+  const j = await r.json();
+  if (!j || !Array.isArray(j.hadiths)) throw new Error('Bad response');
+  return j;
+}
+async function loadBook(n) {
+  const key = 'bukhari-' + n;
+  const cached = await DB.get(key, 'kv');
+  if (cached && cached.items && cached.items.length) return cached;
+  const res = await Promise.allSettled(['ara-bukhari', 'eng-bukhari', 'ben-bukhari'].map(ed => getHadithSection(ed, n)));
+  const ok = res.map(r => r.status === 'fulfilled' ? r.value : null);
+  if (!ok.some(Boolean)) throw new Error('Could not load');
+  const maps = ok.map(j => new Map((j ? j.hadiths : []).map(h => [h.hadithnumber, String(h.text || '').trim()])));
+  const order = [];
+  const seen = new Set();
+  for (const j of ok) if (j) for (const h of j.hadiths) if (!seen.has(h.hadithnumber)) { seen.add(h.hadithnumber); order.push(h); }
+  order.sort((a, b) => a.hadithnumber - b.hadithnumber);
+  const items = order.map(h => ({ n: h.hadithnumber, ref: h.reference || null, ar: maps[0].get(h.hadithnumber) || '', en: maps[1].get(h.hadithnumber) || '', bn: maps[2].get(h.hadithnumber) || '' }))
+    .filter(h => h.ar || h.en || h.bn);
+  const meta = (ok[1] || ok[0] || ok[2]).metadata || {};
+  const sec = meta.section && typeof meta.section === 'object' ? Object.values(meta.section).filter(Boolean)[0] : '';
+  const data = { n, title: sec || bookTitle(n), items, complete: ok.every(Boolean) };
+  if (sec) { const t = store.get('bookTitles', {}); t[n] = sec; store.set('bookTitles', t); }
+  if (data.complete) await DB.set(key, data, 'kv');
+  return data;
+}
+
+async function renderBooks() {
+  setTop({ title: 'Hadith · <span class="bn">হাদিস</span>', sub: 'সহিহ বুখারি · Sahih al-Bukhari' });
+  const have = new Set(await DB.keys('kv'));
+  $('#view').innerHTML = `
+    <div class="card note" style="margin-bottom:12px">Arabic, English and Bangla for every hadith. Choose a book (kitab).<br><span class="bn">প্রতিটি হাদিস আরবি, ইংরেজি ও বাংলায়। একটি অধ্যায় (কিতাব) বেছে নিন।</span></div>
+    <input type="search" class="filter" id="bf" placeholder="Search books, e.g. Fasting, Prayer" autocomplete="off">
+    <ul class="books" id="bl"></ul>`;
+  const draw = () => {
+    const q = $('#bf').value.trim().toLowerCase();
+    const list = BUKHARI_BOOKS.map((_, i) => i + 1).filter(n => !q || bookTitle(n).toLowerCase().includes(q) || String(n) === q);
+    $('#bl').innerHTML = list.map(n => `<li><button data-n="${n}"><span class="bn-no">${n}</span><span>${esc(bookTitle(n))}${have.has('bukhari-' + n) ? '<br><span class="muted" style="font-size:.8em">✓ Saved for offline</span>' : ''}</span></button></li>`).join('') || '<li class="muted">No match</li>';
+    $('#bl').querySelectorAll('button').forEach(b => b.onclick = () => go('book', { n: +b.dataset.n }));
+  };
+  $('#bf').oninput = draw; draw();
+}
+
+async function renderBook({ n }) {
+  state.book = n;
+  setTop({ title: `Bukhari · Book ${n}`, sub: '', back: true, reader: true });
+  $('#title').innerHTML = `Bukhari · Book ${n}<small>${esc(bookTitle(n))}</small>`;
+  $('#view').innerHTML = `<div class="loading"><div class="spinner"></div>Loading hadiths…<br><span class="bn">হাদিস লোড হচ্ছে…</span></div>`;
+  let data;
+  try { data = await loadBook(n); }
+  catch (e) {
+    $('#view').innerHTML = `<div class="card"><b>Could not load this book.</b><p class="bn">অধ্যায়টি লোড করা যায়নি। ইন্টারনেট সংযোগ দেখে আবার চেষ্টা করুন।</p><button class="btn" id="retry">Try again · আবার চেষ্টা</button></div>`;
+    $('#retry').onclick = () => renderBook({ n });
+    return;
+  }
+  if (state.view !== 'book' || state.book !== n) return;
+  $('#title').innerHTML = `Bukhari · Book ${n}<small>${esc(data.title)}</small>`;
+  let h = `<div class="surah-head"><div class="en">Sahih al-Bukhari · Book ${n}</div><div>${esc(data.title)}</div><div class="muted">${data.items.length} hadiths · <span class="bn">${bnNum(data.items.length)}টি হাদিস</span></div></div>`;
+  if (!data.complete) h += `<div class="card note">Some languages could not be downloaded just now. Open this book again later to get all three.</div>`;
+  for (const it of data.items) {
+    h += `<article class="verse"><span class="ref">Hadith ${it.n}</span>
+      ${S.showAr && it.ar ? `<div class="ar" lang="ar" style="font-size:calc(1.45em * var(--ar-mult,1))">${esc(it.ar)}</div>` : ''}
+      ${S.showEn && it.en ? `<span class="lang">ENGLISH</span><div class="tx en" lang="en">${esc(it.en)}</div>` : ''}
+      ${S.showBn && it.bn ? `<span class="lang bn">বাংলা</span><div class="tx bnt" lang="bn">${esc(it.bn)}</div>` : ''}
+    </article>`;
+  }
+  h += `<div class="card note">Sahih al-Bukhari from the open Hadith API (github.com/fawazahmed0/hadith-api). English translation: Muhsin Khan. The Bangla edition does not name its translator.</div>`;
+  h += `<div class="row" style="justify-content:space-between">${n > 1 ? `<button class="btn ghost" id="pb">‹ Book ${n - 1}</button>` : '<span></span>'}${n < BUKHARI_BOOKS.length ? `<button class="btn" id="nb">Book ${n + 1} ›</button>` : ''}</div>`;
+  $('#view').innerHTML = h;
+  $('#view').querySelectorAll('.verse').forEach((el, i) => el.onclick = () => { if (state.focus) setFocus(i); });
+  if ($('#pb')) $('#pb').onclick = () => go('book', { n: n - 1 });
+  if ($('#nb')) $('#nb').onclick = () => go('book', { n: n + 1 });
+}
+
+/* ---------- Ramadan ---------- */
+function hijriOf(date) {
+  try {
+    const p = new Intl.DateTimeFormat('en-u-ca-islamic-umalqura-nu-latn', { day: 'numeric', month: 'numeric', year: 'numeric', timeZone: 'UTC' }).formatToParts(date);
+    const g = t => parseInt(p.find(x => x.type === t).value, 10);
+    return { d: g('day'), m: g('month'), y: g('year') };
+  } catch (e) { return null; }
+}
+function ramadanPeriod(today) {
+  const at = i => { const t = new Date(Date.UTC(today.y, today.m - 1, today.d + i, 12)); return { i, date: t, h: hijriOf(t) }; };
+  if (!at(0).h) return null;
+  let start = null;
+  if (at(0).h.m === 9) { let i = 0; while (i > -31 && at(i - 1).h.m === 9) i--; start = at(i); }
+  else for (let i = 1; i < 420; i++) { const x = at(i); if (x.h.m === 9) { start = x; break; } }
+  if (!start) return null;
+  const days = [];
+  for (let i = start.i; i < start.i + 31; i++) { const x = at(i); if (x.h.m !== 9) break; days.push(x); }
+  return { start, days, eid: at(start.i + days.length), year: start.h.y, inRamadan: at(0).h.m === 9 };
+}
+const RAMADAN_INFO = [
+  ['What is Ramadan?', 'রমজান কী?', 'Ramadan is the ninth month of the Islamic (Hijri) calendar. Muslims fast every day of the month from dawn to sunset. The Quran was first revealed in this month (Quran 2:185).', 'রমজান হিজরি বছরের নবম মাস। এই মাসে মুসলমানরা প্রতিদিন ভোর থেকে সূর্যাস্ত পর্যন্ত রোজা রাখেন। এই মাসেই কুরআন নাজিল হওয়া শুরু হয় (সূরা বাকারা ২:১৮৫)।'],
+  ['Fasting (Sawm)', 'রোজা (সাওম)', 'Fasting is one of the five pillars of Islam. From Fajr until Maghrib a fasting person does not eat, drink or have marital relations, and also tries hard to avoid bad words and actions.', 'রোজা ইসলামের পাঁচটি স্তম্ভের একটি। ফজর থেকে মাগরিব পর্যন্ত রোজাদার খাওয়া, পান করা ও স্বামী-স্ত্রীর মিলন থেকে বিরত থাকেন, এবং খারাপ কথা ও কাজ থেকেও দূরে থাকার চেষ্টা করেন।'],
+  ['Sehri (Suhoor)', 'সেহরি', 'Sehri is the meal eaten before dawn. Eating must stop when Fajr time begins. Many timetables stop a few minutes earlier to be safe.', 'সেহরি হলো ভোরের আগের খাবার। ফজরের সময় শুরু হলে খাওয়া বন্ধ করতে হয়। সতর্কতার জন্য অনেক সময়সূচিতে কয়েক মিনিট আগে শেষ করা হয়।'],
+  ['Iftar', 'ইফতার', 'Iftar is the meal that breaks the fast at sunset (Maghrib time). Many people open their fast with dates and water, following the Sunnah.', 'ইফতার হলো সূর্যাস্তের সময় (মাগরিবের ওয়াক্তে) রোজা ভাঙার খাবার। সুন্নাহ অনুসরণ করে অনেকে খেজুর ও পানি দিয়ে ইফতার করেন।'],
+  ['Taraweeh', 'তারাবি', 'Taraweeh are special night prayers in Ramadan, prayed after Isha. They are often prayed together in the mosque, and much of the Quran is recited.', 'তারাবি হলো রমজানের বিশেষ রাতের নামাজ, যা এশার পরে পড়া হয়। প্রায়ই মসজিদে জামাতে পড়া হয় এবং কুরআনের অনেক অংশ তিলাওয়াত করা হয়।'],
+  ['Laylatul Qadr', 'লাইলাতুল কদর', 'The Night of Decree is in the last ten nights of Ramadan, most likely on an odd night. The Quran says it is better than a thousand months (Surah Al-Qadr, 97).', 'লাইলাতুল কদর রমজানের শেষ দশ রাতের মধ্যে, বিশেষ করে বেজোড় রাতে হওয়ার সম্ভাবনা বেশি। কুরআনে বলা হয়েছে এই রাত হাজার মাসের চেয়েও উত্তম (সূরা আল-কদর, ৯৭)।'],
+  ["I'tikaf", 'ইতিকাফ', "In the last ten days, some people stay in the mosque for worship. This is called I'tikaf.", 'শেষ দশ দিনে কেউ কেউ ইবাদতের জন্য মসজিদে অবস্থান করেন। একে ইতিকাফ বলে।'],
+  ['Zakat al-Fitr (Fitrana)', 'যাকাতুল ফিতর (ফিতরা)', "Zakat al-Fitr is a small charity paid for each family member before the Eid prayer, so that people in need can also celebrate Eid. Ask your local mosque for this year's amount.", 'যাকাতুল ফিতর (ফিতরা) হলো পরিবারের প্রত্যেক সদস্যের পক্ষ থেকে ঈদের নামাজের আগে দেওয়া একটি ছোট দান, যাতে অভাবী মানুষও ঈদ উদযাপন করতে পারে। এ বছরের পরিমাণ জানতে স্থানীয় মসজিদে জিজ্ঞেস করুন।'],
+  ['Who does not have to fast?', 'কারা রোজা থেকে অব্যাহতি পান?', 'People who are ill or travelling, women who are pregnant, breastfeeding or on their period, and the very elderly are excused. Most make up the missed days later. Those who can never fast may pay fidyah (feeding a person in need). Ask a scholar about your own situation.', 'অসুস্থ ও ভ্রমণরত ব্যক্তি, গর্ভবতী, দুগ্ধদানকারী বা মাসিক চলাকালীন নারী এবং খুব বয়স্ক ব্যক্তিরা অব্যাহতি পান। বেশিরভাগ ক্ষেত্রে পরে কাযা রোজা রাখতে হয়। যারা কখনোই রোজা রাখতে পারবেন না তারা ফিদইয়া দিতে পারেন (একজন অভাবীকে খাওয়ানো)। নিজের অবস্থার জন্য একজন আলেমের কাছে জিজ্ঞেস করুন।'],
+  ['Eid al-Fitr', 'ঈদুল ফিতর', 'Ramadan ends with Eid al-Fitr on the first day of Shawwal: a day of prayer, thanks and celebration.', 'রমজানের শেষে শাওয়াল মাসের প্রথম দিনে ঈদুল ফিতর — নামাজ, শুকরিয়া ও আনন্দের দিন।'],
+];
+
+function renderRamadan() {
+  setTop({ title: 'Ramadan · <span class="bn">রমজান</span>', sub: 'সেহরি ও ইফতারের সময় · রমজান সম্পর্কে জানুন' });
+  const place = currentPlace(), o = opts(place), tz = place.tz;
+  const today = PT.localYMD(tz);
+  const R = ramadanPeriod(today);
+  const longDate = d => new Intl.DateTimeFormat('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' }).format(d);
+  const shortDate = d => new Intl.DateTimeFormat('en-GB', { weekday: 'short', day: 'numeric', month: 'short', timeZone: 'UTC' }).format(d);
+  let h = '';
+  if (R) {
+    const startIn = Math.round((R.start.date - new Date(Date.UTC(today.y, today.m - 1, today.d, 12))) / 864e5);
+    if (R.inRamadan) {
+      const dayNo = R.days.findIndex(x => x.i === 0) + 1;
+      const t = PT.forDate(today.y, today.m, today.d, place, o);
+      h += `<div class="card rhero"><div>Ramadan ${R.year} AH · <span class="bn">রমজান</span></div><div class="big">Day ${dayNo} · <span class="bn">${bnNum(dayNo)} রোজা</span></div><div>${esc(place.city)}, ${esc(place.country)}</div></div>
+      <div class="twin"><div class="card"><div>Sehri ends<br><span class="bn">সেহরির শেষ সময়</span></div><div class="t">${fmt(t.fajr, tz)}</div></div>
+      <div class="card"><div>Iftar<br><span class="bn">ইফতার</span></div><div class="t">${fmt(t.maghrib, tz)}</div></div></div>`;
+    } else {
+      h += `<div class="card rhero"><div>Ramadan ${R.year} AH · <span class="bn">পরবর্তী রমজান</span></div><div class="big">Expected to start ${esc(longDate(R.start.date))}</div>
+      <div style="font-size:1.15em">in ${startIn} days · <span class="bn">আর ${bnNum(startIn)} দিন</span></div>
+      <div style="margin-top:6px">Eid al-Fitr expected ${esc(longDate(R.eid.date))}</div></div>`;
+    }
+    h += `<p class="note">Dates follow the Umm al-Qura calendar. The real start depends on moon sighting in your country, so it may be one day different. The first Taraweeh is prayed the night before the first fast.<br><span class="bn">চাঁদ দেখার উপর নির্ভর করে তারিখ এক দিন আগে-পরে হতে পারে।</span></p>`;
+    h += `<h2>Sehri &amp; Iftar timetable · <span class="bn">সময়সূচি</span></h2>
+      <div class="card loc"><div><div class="place">${esc(place.city)}</div><div class="muted">${esc(place.country)}</div></div><button class="btn ghost" id="rchg">Change · <span class="bn">বদলান</span></button></div>
+      <div class="weekwrap"><table class="week"><tr><th>Day</th><th>Date</th><th>Sehri ends</th><th>Iftar</th></tr>
+      ${R.days.map((x, k) => { const d = x.date; const t = PT.forDate(d.getUTCFullYear(), d.getUTCMonth() + 1, d.getUTCDate(), place, o); return `<tr class="${x.i === 0 ? 'today' : ''}"><td>${k + 1}</td><td>${shortDate(d)}</td><td>${fmt(t.fajr, tz)}</td><td>${fmt(t.maghrib, tz)}</td></tr>`; }).join('')}
+      </table></div>
+      <p class="note">Sehri ends at the start of Fajr; Iftar is at Maghrib. Uses the calculation method set on the Prayer tab. Follow your local mosque's timetable if it is different.</p>`;
+  } else {
+    h += `<div class="card note">Ramadan dates are not available on this device, but everything below still works.</div>`;
+  }
+  h += `<h2>Learn about Ramadan · <span class="bn">রমজান সম্পর্কে জানুন</span></h2>` +
+    RAMADAN_INFO.map(([en, bn, ten, tbn], i) => `<details class="info"${i === 0 ? ' open' : ''}><summary>${esc(en)} · <span class="bn">&nbsp;${esc(bn)}</span></summary><p>${esc(ten)}</p><p class="bn">${esc(tbn)}</p></details>`).join('');
+  h += `<h2>Read more · <span class="bn">আরও পড়ুন</span></h2>
+    <div class="linkbtns">
+      <button class="btn ghost" data-go="q" data-j="2" data-s="2" data-a="183">📖 Quran 2:183–187 — the verses about fasting · <span class="bn">রোজার আয়াত</span></button>
+      <button class="btn ghost" data-go="q" data-j="30" data-s="97" data-a="1">📖 Surah Al-Qadr (97) — Laylatul Qadr · <span class="bn">সূরা আল-কদর</span></button>
+      <button class="btn ghost" data-go="b" data-n="30">📜 Bukhari: ${esc(bookTitle(30))}</button>
+      <button class="btn ghost" data-go="b" data-n="31">📜 Bukhari: ${esc(bookTitle(31))}</button>
+      <button class="btn ghost" data-go="b" data-n="32">📜 Bukhari: ${esc(bookTitle(32))}</button>
+    </div>`;
+  $('#view').innerHTML = h;
+  if ($('#rchg')) $('#rchg').onclick = () => { openPlacePicker(); };
+  $('#view').querySelectorAll('[data-go]').forEach(b => b.onclick = () => b.dataset.go === 'q' ? go('reader', { juz: +b.dataset.j, s: +b.dataset.s, a: +b.dataset.a }) : go('book', { n: +b.dataset.n }));
+}
+
+/* ---------- wiring ---------- */
+document.querySelectorAll('#tabs button').forEach(b => b.onclick = () => go(b.dataset.tab));
+$('#backBtn').onclick = () => go(state.view === 'book' ? 'hadith' : 'quran');
+$('#focusBtn').onclick = toggleFocus;
+$('#prevV').onclick = () => setFocus(state.focusIdx - 1);
+$('#nextV').onclick = () => setFocus(state.focusIdx + 1);
+$('#aaBtn').onclick = () => openSheet(displayControls(), root => wireDisplay(root, () => {
+  if (state.view === 'book') { renderBook({ n: state.book }); return; }
+  const l = store.get('last', null); renderReader({ juz: state.juz, id: l && l.juz === state.juz ? l.id : null });
+}));
+const moveRuler = y => { const r = $('#ruler'); r.style.top = Math.max(60, y - r.offsetHeight / 2) + 'px'; };
+window.addEventListener('touchmove', e => { if (S.ruler && state.view === 'reader') moveRuler(e.touches[0].clientY); }, { passive: true });
+window.addEventListener('touchstart', e => { if (S.ruler && state.view === 'reader') moveRuler(e.touches[0].clientY); }, { passive: true });
+window.addEventListener('mousemove', e => { if (S.ruler && state.view === 'reader') moveRuler(e.clientY); });
+
+applySettings();
+(function start() {
+  const h = location.hash.slice(1);
+  const m = h.match(/^para-(\d+)$/);
+  if (m && +m[1] >= 1 && +m[1] <= 30) go('reader', { juz: +m[1] });
+  else if (/^bukhari-\d+$/.test(h)) go('book', { n: +h.split('-')[1] });
+  else if (['prayer', 'settings', 'hadith', 'ramadan'].includes(h)) go(h);
+  else go('quran');
+})();
+if ('serviceWorker' in navigator && location.protocol.startsWith('http')) navigator.serviceWorker.register('sw.js').catch(() => {});
+</script>
+</body>
+</html>
