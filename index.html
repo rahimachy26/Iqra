@@ -926,24 +926,15 @@ function toggleFocus() {
 }
 
 /* ---------- Tafsir · তাফসির ----------
-   Mukhtasar (Bangla & English) is stored in the app (tafsir/…), as QuranEnc.com permits re-publishing unmodified with credit.
-   The others are fetched on demand from the open tafsir_api collection and saved on the device. */
-const TAF_CDN = 'https://cdn.jsdelivr.net/gh/spa5k/tafsir_api@eb82bb6294efe30ad5c135c03b1864afaa70e855/tafsir/';
+   Al-Mukhtasar (Bangla & English) is stored in the app (tafsir/…), as QuranEnc.com permits re-publishing unmodified with credit. */
 const TAFSIRS = [
   { id: 'bn-mukhtasar', lang: 'bn', name: 'Al-Mukhtasar (Bangla)', bn: 'আল-মুখতাসার (সংক্ষিপ্ত তাফসির)', level: 'Short & easy · সংক্ষিপ্ত ও সহজ', local: true,
     credit: 'Al-Mukhtasar in Interpreting the Noble Quran (Bengali translation), issued by the Tafsir Center for Quranic Studies. Source: QuranEnc.com — reproduced without modification.' },
-  { id: 'bn-tafsir-ahsanul-bayaan', lang: 'bn', name: 'Tafsir Ahsanul Bayaan', bn: 'তাফসীর আহসানুল বায়ান', level: 'Short notes · ছোট টীকা',
-    credit: 'Tafsir Ahsanul Bayaan (Bangla), Bayaan Foundation. Text as published on quran.com, via the open tafsir_api collection (github.com/spa5k/tafsir_api).' },
-  { id: 'bn-tafsir-abu-bakr-zakaria', lang: 'bn', name: 'Tafsir Abu Bakr Zakaria', bn: 'তাফসীর আবু বকর যাকারিয়া', level: 'Medium · মাঝারি',
-    credit: 'Tafsir by Dr. Abu Bakr Muhammad Zakaria (Bangla), King Fahd Quran Printing Complex. Text as published on quran.com, via the open tafsir_api collection (github.com/spa5k/tafsir_api).' },
-  { id: 'bn-tafseer-ibn-e-kaseer', lang: 'bn', name: 'Tafsir Ibn Kathir (Bangla)', bn: 'তাফসীর ইবনে কাসীর', level: 'Detailed · বিস্তারিত',
-    credit: 'Tafsir Ibn Kathir (Bangla), Tawheed Publication. Text as published on quran.com, via the open tafsir_api collection (github.com/spa5k/tafsir_api).' },
   { id: 'en-mukhtasar', lang: 'en', name: 'Al-Mukhtasar (English)', bn: 'আল-মুখতাসার (ইংরেজি)', level: 'Short & easy · English', local: true,
     credit: 'Al-Mukhtasar in Interpreting the Noble Quran (English translation), issued by the Tafsir Center for Quranic Studies. Source: QuranEnc.com — reproduced without modification.' },
-  { id: 'en-tafisr-ibn-kathir', lang: 'en', name: 'Tafsir Ibn Kathir (English, abridged)', bn: 'ইবনে কাসীর (ইংরেজি)', level: 'Detailed · English',
-    credit: 'Tafsir Ibn Kathir (English, abridged). Text as published on quran.com, via the open tafsir_api collection (github.com/spa5k/tafsir_api).' },
 ];
 const tafInfo = id => TAFSIRS.find(t => t.id === id) || TAFSIRS[0];
+if (!TAFSIRS.some(t => t.id === S.tafsir)) { S.tafsir = TAFSIRS[0].id; save(); }
 const tafMem = new Map();
 /* returns an array: one tafsir text per ayah of the surah */
 async function loadTafsir(id, surah) {
@@ -952,7 +943,7 @@ async function loadTafsir(id, surah) {
   let arr = await DB.get(key, 'kv');
   if (!Array.isArray(arr) || !arr.length) {
     const t = tafInfo(id);
-    const r = await fetch(t.local ? `tafsir/${t.id}/${surah}.json` : `${TAF_CDN}${t.id}/${surah}.json`);
+    const r = await fetch(`tafsir/${t.id}/${surah}.json`);
     if (!r.ok) throw new Error('HTTP ' + r.status);
     const j = await r.json();
     if (Array.isArray(j) && typeof j[0] !== 'object') arr = j;
@@ -1007,7 +998,7 @@ function openTafsir(verseEl) {
         sheet.querySelector('#tafBody').scrollTop = 0; sheet.scrollTop = 0;
       } catch (e) {
         if (my !== token) return;
-        sheet.querySelector('#tafBody').innerHTML = `<p><b>Could not load the tafsir.</b> Please check your internet connection.<br><span class="bn">তাফসির লোড করা যায়নি। ইন্টারনেট সংযোগ দেখে আবার চেষ্টা করুন।</span></p><p class="note">Once a surah's tafsir has opened, it is saved and works offline. Al-Mukhtasar always works offline.</p>`;
+        sheet.querySelector('#tafBody').innerHTML = `<p><b>Could not load the tafsir.</b> Please check your internet connection.<br><span class="bn">তাফসির লোড করা যায়নি। ইন্টারনেট সংযোগ দেখে আবার চেষ্টা করুন।</span></p>`;
       }
       const vs = all(), i = vs.indexOf(cur);
       const nextEl = findV(s, group[1] + 1) || (findV(s, group[1]) ? vs[vs.indexOf(findV(s, group[1])) + 1] : vs[i + 1]);
@@ -1196,7 +1187,7 @@ async function renderSettings() {
   <h2>Tafsir · <span class="bn">তাফসির</span></h2>
   <div class="card"><p style="margin-top:0">Tap <b>📘 Tafsir</b> on any ayah to read its explanation.<br><span class="bn">যেকোনো আয়াতের পাশে “📘 Tafsir” চাপলে তার ব্যাখ্যা দেখতে পাবেন।</span></p>
     <label class="f">Default tafsir · <span class="bn">পছন্দের তাফসির</span></label>${tafSelectHTML('setTaf')}
-    <p class="note">Al-Mukhtasar works offline. Other tafsirs download one surah at a time and are then saved on your phone.<br><span class="bn">আল-মুখতাসার অফলাইনে চলে। অন্যগুলো একবার খুললে ফোনে সেভ হয়ে যায়।</span></p></div>
+    <p class="note">Al-Mukhtasar works offline. <br><span class="bn">আল-মুখতাসার ইন্টারনেট ছাড়াও চলে।</span></p></div>
   <h2>Offline reading · <span class="bn">অফলাইনে পড়া</span></h2>
   <div class="card">
     <p style="margin-top:0"><b id="haveN">${have}</b> of 30 Paras saved on this device.<br><span class="bn">অফলাইনে পড়ার জন্য সব পারা ডাউনলোড করুন।</span></p>
@@ -1208,7 +1199,7 @@ async function renderSettings() {
   <div class="card"><p style="margin-top:0">Send the Iqra app to family and friends.<br><span class="bn">পরিবার ও বন্ধুদের সাথে অ্যাপটি শেয়ার করুন।</span></p><button class="btn" data-share="app" style="width:100%">Share the app · <span class="bn">অ্যাপ শেয়ার করুন</span></button></div>
   <h2>Add to iPhone home screen</h2>
   <div class="card note">In Safari, tap the Share button, then <b>Add to Home Screen</b>. The app then opens full screen with its own icon.<br><span class="bn">Safari-তে Share বোতাম চাপুন, তারপর “Add to Home Screen” বেছে নিন।</span></div>
-  <div class="card note">Arabic text: Uthmani script. Bangla translation and Arabic text are downloaded from the Al-Quran Cloud API (alquran.cloud). Recitation: Mishary Rashid Alafasy, streamed from the Islamic Network CDN (cdn.islamic.network; EveryAyah.com recordings). Word timings: quran-align, © 2016 Collin Fair, CC BY 4.0 (creativecommons.org/licenses/by/4.0), github.com/cpfair/quran-align, split into one file per surah, provided without warranty. Prayer times are calculated on your device. Surah benefits use only authentic narrations (Bukhari, Muslim, or graded sahih/hasan), with references linked to sunnah.com. Sahih al-Bukhari (Arabic, English by Muhsin Khan, and Bangla) is downloaded from the open Hadith API by Fawaz Ahmed (github.com/fawazahmed0/hadith-api). Tafsir: Al-Mukhtasar in Interpreting the Noble Quran (Bangla and English), Tafsir Center for Quranic Studies, from QuranEnc.com, reproduced without modification; Tafsir Ahsanul Bayaan (Bayaan Foundation), Tafsir Abu Bakr Zakaria (King Fahd Quran Printing Complex), Tafsir Ibn Kathir (Bangla: Tawheed Publication; English abridged), as published on quran.com, via github.com/spa5k/tafsir_api.</div>`;
+  <div class="card note">Arabic text: Uthmani script. Bangla translation and Arabic text are downloaded from the Al-Quran Cloud API (alquran.cloud). Recitation: Mishary Rashid Alafasy, streamed from the Islamic Network CDN (cdn.islamic.network; EveryAyah.com recordings). Word timings: quran-align, © 2016 Collin Fair, CC BY 4.0 (creativecommons.org/licenses/by/4.0), github.com/cpfair/quran-align, split into one file per surah, provided without warranty. Prayer times are calculated on your device. Surah benefits use only authentic narrations (Bukhari, Muslim, or graded sahih/hasan), with references linked to sunnah.com. Sahih al-Bukhari (Arabic, English by Muhsin Khan, and Bangla) is downloaded from the open Hadith API by Fawaz Ahmed (github.com/fawazahmed0/hadith-api). Tafsir: Al-Mukhtasar in Interpreting the Noble Quran (Bangla and English), Tafsir Center for Quranic Studies, from QuranEnc.com, reproduced without modification.</div>`;
   wireDisplay($('#view'));
   $('#view .setTaf').onchange = e => { S.tafsir = e.target.value; save(); };
   $('#dlAll').onclick = async () => {
