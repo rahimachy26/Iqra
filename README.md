@@ -2,7 +2,7 @@
 
 Path of Guidance is a free Islamic app for iPhone. It was made so that everyone can read and learn about their deen with comfort, including people with dyslexia and other reading difficulties.
 
-**Open the app:** https://rahimachy26.github.io/path-of-guidance/
+**Open the app:** https://rahimachy26.github.io/Path-of-Guidance/
 
 ## The Holy Quran
 All 30 paras of the Quran in clear Arabic (Uthmani script), with the Bangla translation under every verse. Each surah has a heading with its name and number of ayahs. The app remembers where you stopped, so you can carry on from the same verse next time. Paras you have opened are saved on your phone and can be read without internet.
