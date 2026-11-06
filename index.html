@@ -14,7 +14,7 @@
 <link rel="icon" href="icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Lexend:wght@400;600&family=Noto+Sans+Bengali:wght@400;600&family=Hind+Siliguri:wght@400;600&family=Scheherazade+New:wght@400;700&family=Amiri:wght@400;700&display=swap" rel="stylesheet">
+<link id="gfonts" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;600&family=Noto+Sans+Bengali:wght@400;600&family=Scheherazade+New:wght@400;700&display=swap" media="print" onload="this.media='all'">
 <style>
 :root{
   --bg:#FBF6E9; --fg:#2B2A28; --muted:#6B675F; --card:#FFFDF6; --line:#E6DCC4; --accent:#1F6F5C; --accent-soft:#DCEFE7; --hl:#FFF0B8;
@@ -67,7 +67,7 @@ h2{font-size:1.1em;margin:22px 0 10px}
 .surah-head .ar{font-family:var(--ar-font);font-size:1.8em;line-height:1.6}
 .surah-head .en{font-weight:600}
 .bism{font-family:var(--ar-font);font-size:calc(1.6em * var(--ar-mult,1));text-align:center;direction:rtl;margin:6px 0 18px;line-height:2}
-.verse{background:var(--card);border:2px solid var(--line);border-radius:18px;padding:14px 16px;margin-bottom:12px;scroll-margin-top:calc(90px + var(--safe-top));transition:opacity .2s}
+.verse{content-visibility:auto;contain-intrinsic-size:auto 260px;background:var(--card);border:2px solid var(--line);border-radius:18px;padding:14px 16px;margin-bottom:12px;scroll-margin-top:calc(90px + var(--safe-top));transition:opacity .2s}
 .verse .ref{display:inline-flex;align-items:center;justify-content:center;min-width:2.6em;padding:2px 10px;border-radius:999px;background:var(--accent-soft);color:var(--accent);font-weight:600;font-size:.8em}
 .verse .ar{clear:both;font-family:var(--ar-font);direction:rtl;text-align:right;font-size:calc(1.75em * var(--ar-mult,1));line-height:2.1;margin:10px 0 6px;letter-spacing:0;word-spacing:normal}
 .verse .tr{font-family:var(--bn-font);line-height:var(--lh);font-size:1.05em;text-align:left;margin-top:6px}
@@ -634,6 +634,10 @@ function applySettings() {
   r.setProperty('--bn-font', `'${S.bnFont}','Noto Sans Bengali',sans-serif`);
   r.setProperty('--ar-font', `'${S.arFont}','Scheherazade New',serif`);
   document.querySelector('meta[name=theme-color]').setAttribute('content', t.bg);
+  // load only the fonts in use (faster start); the page shows straight away with system fonts until they arrive
+  const fam = [...new Set([S.uiFont, S.bnFont, S.arFont, 'Noto Sans Bengali', 'Scheherazade New'])].filter(f => f !== 'system-ui');
+  const href = 'https://fonts.googleapis.com/css2?' + fam.map(f => 'family=' + f.replace(/ /g, '+') + ':wght@' + (/Scheherazade|Amiri|Atkinson/.test(f) ? '400;700' : '400;600')).join('&') + '&display=swap';
+  const gl = document.getElementById('gfonts'); if (gl && gl.href !== href) gl.href = href;
   $('#ruler').classList.toggle('hidden', !(S.ruler && state.view === 'reader'));
 }
 
@@ -893,7 +897,7 @@ async function renderReader({ juz, surah, id, s: jumpS, a: jumpA }) {
   $('#view').querySelectorAll('[data-taf]').forEach(b => b.onclick = ev => { ev.stopPropagation(); openTafsir(b.closest('.verse')); });
   $('#playAll').onclick = () => { const f = $('#view .verse[data-id]'); if (f) apStart(f); };
   const target = jumpS ? $(`#view .verse[data-s="${jumpS}"][data-a="${jumpA}"]`) : (id && document.getElementById('v' + id));
-  if (target) { target.scrollIntoView(); if (jumpS) { target.style.borderColor = 'var(--accent)'; target.style.background = 'var(--hl)'; } }
+  if (target) { scrollToEl(target); if (jumpS) { target.style.borderColor = 'var(--accent)'; target.style.background = 'var(--hl)'; } }
   // remember position
   const io = new IntersectionObserver(entries => {
     const vis = entries.filter(e => e.isIntersecting).map(e => e.target);
@@ -903,6 +907,11 @@ async function renderReader({ juz, surah, id, s: jumpS, a: jumpA }) {
   }, { rootMargin: '-25% 0px -65% 0px' });
   $('#view').querySelectorAll('.verse').forEach(el => io.observe(el));
   state.observer = io;
+}
+/* verses off screen are only laid out when needed (faster), so re-aim until the position settles */
+function scrollToEl(el, block = 'start') {
+  let n = 0, last = null;
+  (function step() { el.scrollIntoView({ block }); const t = Math.round(el.getBoundingClientRect().top); if (n++ < 10 && t !== last) { last = t; setTimeout(step, 40); } })();
 }
 function verses() { return [...$('#view').querySelectorAll('.verse')]; }
 function setFocus(i) {
@@ -1004,8 +1013,8 @@ function openTafsir(verseEl) {
       const nextEl = findV(s, group[1] + 1) || (findV(s, group[1]) ? vs[vs.indexOf(findV(s, group[1])) + 1] : vs[i + 1]);
       const prevEl = findV(s, group[0] - 1) || vs[vs.indexOf(findV(s, group[0]) || cur) - 1];
       sheet.querySelector('#tafNext').disabled = !nextEl; sheet.querySelector('#tafPrev').disabled = !prevEl;
-      sheet.querySelector('#tafNext').onclick = () => { if (nextEl) { cur = nextEl; cur.scrollIntoView({ block: 'center' }); show(); } };
-      sheet.querySelector('#tafPrev').onclick = () => { if (prevEl) { cur = prevEl; cur.scrollIntoView({ block: 'center' }); show(); } };
+      sheet.querySelector('#tafNext').onclick = () => { if (nextEl) { cur = nextEl; scrollToEl(cur, 'center'); show(); } };
+      sheet.querySelector('#tafPrev').onclick = () => { if (prevEl) { cur = prevEl; scrollToEl(cur, 'center'); show(); } };
     }
     sheet.querySelector('.tafsel').onchange = e => { S.tafsir = e.target.value; save(); show(); };
     show();
@@ -1197,6 +1206,7 @@ async function renderSettings() {
   </div>
   <h2>Share Iqra · <span class="bn">শেয়ার করুন</span></h2>
   <div class="card"><p style="margin-top:0">Send the Iqra app to family and friends.<br><span class="bn">পরিবার ও বন্ধুদের সাথে অ্যাপটি শেয়ার করুন।</span></p><button class="btn" data-share="app" style="width:100%">Share the app · <span class="bn">অ্যাপ শেয়ার করুন</span></button></div>
+  <div class="card"><a href="privacy.html">Privacy policy · <span class="bn">গোপনীয়তা নীতি</span></a> — Iqra collects no personal data. <span class="bn">Iqra কোনো ব্যক্তিগত তথ্য নেয় না।</span></div>
   <h2>Add to iPhone home screen</h2>
   <div class="card note">In Safari, tap the Share button, then <b>Add to Home Screen</b>. The app then opens full screen with its own icon.<br><span class="bn">Safari-তে Share বোতাম চাপুন, তারপর “Add to Home Screen” বেছে নিন।</span></div>
   <div class="card note">Arabic text: Uthmani script. Bangla translation and Arabic text are downloaded from the Al-Quran Cloud API (alquran.cloud). Recitation: Mishary Rashid Alafasy, streamed from the Islamic Network CDN (cdn.islamic.network; EveryAyah.com recordings). Word timings: quran-align, © 2016 Collin Fair, CC BY 4.0 (creativecommons.org/licenses/by/4.0), github.com/cpfair/quran-align, split into one file per surah, provided without warranty. Prayer times are calculated on your device. Surah benefits use only authentic narrations (Bukhari, Muslim, or graded sahih/hasan), with references linked to sunnah.com. Sahih al-Bukhari (Arabic, English by Muhsin Khan, and Bangla) is downloaded from the open Hadith API by Fawaz Ahmed (github.com/fawazahmed0/hadith-api). Tafsir: Al-Mukhtasar in Interpreting the Noble Quran (Bangla and English), Tafsir Center for Quranic Studies, from QuranEnc.com, reproduced without modification.</div>`;

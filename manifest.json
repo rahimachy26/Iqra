@@ -1,6 +1,8 @@
 {
+  "id": "./",
   "name": "Iqra – কুরআন ও সুন্নাহ",
   "short_name": "Iqra",
+  "description": "Quran with Bangla translation and tafsir, Sahih al-Bukhari, prayer times, Qibla, Ramadan and zakat, in an easy-to-read, dyslexia-friendly design. কুরআন, তাফসির, হাদিস, নামাজের সময় ও রমজান।",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
@@ -19,5 +21,10 @@
       "type": "image/png",
       "purpose": "any maskable"
     }
+  ],
+  "categories": [
+    "books",
+    "education",
+    "lifestyle"
   ]
 }
