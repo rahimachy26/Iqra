@@ -235,6 +235,13 @@ details.benefit{border-color:var(--accent);background:var(--hl)}
 .bref a{color:var(--accent)}
 .empty{text-align:center;padding:30px 10px}
 
+/* tafsir */
+.taf-ayah{background:var(--card);border:2px solid var(--line);border-radius:14px;padding:10px 14px;margin:10px 0}
+.taf-ayah .ar{font-size:calc(1.35em * var(--ar-mult, 1));clear:none}
+.taf-body p{margin:0 0 .9em;line-height:var(--lh)}
+.taf-body{font-size:1em}
+.taf-group{background:var(--accent-soft);border-radius:10px;padding:6px 10px;font-size:.85em;margin:6px 0}
+.tafsel{width:100%}
 /* sheet */
 .sheet-back{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:50;display:flex;align-items:flex-end;justify-content:center}
 .sheet{background:var(--bg);width:100%;max-width:760px;max-height:88vh;overflow:auto;border-radius:22px 22px 0 0;padding:18px 16px calc(24px + var(--safe-bot));border-top:3px solid var(--line)}
@@ -612,7 +619,7 @@ const THEMES = {
 const DEFAULTS = {
   theme: 'cream', scale: 1.15, lh: 1.9, wide: false, uiFont: 'Lexend', bnFont: 'Noto Sans Bengali', arFont: 'Scheherazade New', arMult: 1,
   showAr: true, showBn: true, showEn: true, ruler: false,
-  placeId: 'United Kingdom|Manchester', custom: null, method: null, asr: null, highLat: 'AngleBased', h24: false,
+  tafsir: 'bn-mukhtasar', placeId: 'United Kingdom|Manchester', custom: null, method: null, asr: null, highLat: 'AngleBased', h24: false,
 };
 let S = Object.assign({}, DEFAULTS, store.get('settings', {}));
 const save = () => store.set('settings', S);
@@ -870,7 +877,7 @@ async function renderReader({ juz, surah, id, s: jumpS, a: jumpA }) {
     const [bism, rest] = splitBism(v);
     if (bism && S.showAr) h += `<div class="bism" lang="ar">${esc(bism)}</div>`;
     h += `<article class="verse" id="v${v.id}" data-id="${v.id}" data-s="${v.s}" data-a="${v.a}">
-      ${shareBtn()}<button class="sharebtn" data-play aria-label="Listen to this ayah">▶<span>Listen</span></button><span class="ref">${v.s}:${v.a}</span>${v.sajda ? '<span class="sajda">۩ Sajdah · সিজদা</span>' : ''}
+      ${shareBtn()}<button class="sharebtn" data-play aria-label="Listen to this ayah">▶<span>Listen</span></button><button class="sharebtn" data-taf aria-label="Tafsir of this ayah">📘<span>Tafsir</span></button><span class="ref">${v.s}:${v.a}</span>${v.sajda ? '<span class="sajda">۩ Sajdah · সিজদা</span>' : ''}
       ${S.showAr ? `<div class="ar" lang="ar">${arWordsHTML(rest).html}</div>` : ''}
       ${S.showBn ? `<div class="tr" lang="bn">${esc(v.bn)}</div>` : ''}
     </article>`;
@@ -883,6 +890,7 @@ async function renderReader({ juz, surah, id, s: jumpS, a: jumpA }) {
   if ($('#nextJ')) $('#nextJ').onclick = () => go('reader', surah ? { surah: surah + 1 } : { juz: juz + 1 });
   $('#view').querySelectorAll('.verse').forEach((el, i) => el.onclick = () => { if (state.focus) setFocus(i); });
   $('#view').querySelectorAll('[data-play]').forEach(b => b.onclick = ev => { ev.stopPropagation(); apStart(b.closest('.verse')); });
+  $('#view').querySelectorAll('[data-taf]').forEach(b => b.onclick = ev => { ev.stopPropagation(); openTafsir(b.closest('.verse')); });
   $('#playAll').onclick = () => { const f = $('#view .verse[data-id]'); if (f) apStart(f); };
   const target = jumpS ? $(`#view .verse[data-s="${jumpS}"][data-a="${jumpA}"]`) : (id && document.getElementById('v' + id));
   if (target) { target.scrollIntoView(); if (jumpS) { target.style.borderColor = 'var(--accent)'; target.style.background = 'var(--hl)'; } }
@@ -915,6 +923,102 @@ function toggleFocus() {
     let idx = vs.findIndex(el => el.getBoundingClientRect().bottom > mid);
     setFocus(idx < 0 ? 0 : idx);
   }
+}
+
+/* ---------- Tafsir · তাফসির ----------
+   Mukhtasar (Bangla & English) is stored in the app (tafsir/…), as QuranEnc.com permits re-publishing unmodified with credit.
+   The others are fetched on demand from the open tafsir_api collection and saved on the device. */
+const TAF_CDN = 'https://cdn.jsdelivr.net/gh/spa5k/tafsir_api@eb82bb6294efe30ad5c135c03b1864afaa70e855/tafsir/';
+const TAFSIRS = [
+  { id: 'bn-mukhtasar', lang: 'bn', name: 'Al-Mukhtasar (Bangla)', bn: 'আল-মুখতাসার (সংক্ষিপ্ত তাফসির)', level: 'Short & easy · সংক্ষিপ্ত ও সহজ', local: true,
+    credit: 'Al-Mukhtasar in Interpreting the Noble Quran (Bengali translation), issued by the Tafsir Center for Quranic Studies. Source: QuranEnc.com — reproduced without modification.' },
+  { id: 'bn-tafsir-ahsanul-bayaan', lang: 'bn', name: 'Tafsir Ahsanul Bayaan', bn: 'তাফসীর আহসানুল বায়ান', level: 'Short notes · ছোট টীকা',
+    credit: 'Tafsir Ahsanul Bayaan (Bangla), Bayaan Foundation. Text as published on quran.com, via the open tafsir_api collection (github.com/spa5k/tafsir_api).' },
+  { id: 'bn-tafsir-abu-bakr-zakaria', lang: 'bn', name: 'Tafsir Abu Bakr Zakaria', bn: 'তাফসীর আবু বকর যাকারিয়া', level: 'Medium · মাঝারি',
+    credit: 'Tafsir by Dr. Abu Bakr Muhammad Zakaria (Bangla), King Fahd Quran Printing Complex. Text as published on quran.com, via the open tafsir_api collection (github.com/spa5k/tafsir_api).' },
+  { id: 'bn-tafseer-ibn-e-kaseer', lang: 'bn', name: 'Tafsir Ibn Kathir (Bangla)', bn: 'তাফসীর ইবনে কাসীর', level: 'Detailed · বিস্তারিত',
+    credit: 'Tafsir Ibn Kathir (Bangla), Tawheed Publication. Text as published on quran.com, via the open tafsir_api collection (github.com/spa5k/tafsir_api).' },
+  { id: 'en-mukhtasar', lang: 'en', name: 'Al-Mukhtasar (English)', bn: 'আল-মুখতাসার (ইংরেজি)', level: 'Short & easy · English', local: true,
+    credit: 'Al-Mukhtasar in Interpreting the Noble Quran (English translation), issued by the Tafsir Center for Quranic Studies. Source: QuranEnc.com — reproduced without modification.' },
+  { id: 'en-tafisr-ibn-kathir', lang: 'en', name: 'Tafsir Ibn Kathir (English, abridged)', bn: 'ইবনে কাসীর (ইংরেজি)', level: 'Detailed · English',
+    credit: 'Tafsir Ibn Kathir (English, abridged). Text as published on quran.com, via the open tafsir_api collection (github.com/spa5k/tafsir_api).' },
+];
+const tafInfo = id => TAFSIRS.find(t => t.id === id) || TAFSIRS[0];
+const tafMem = new Map();
+/* returns an array: one tafsir text per ayah of the surah */
+async function loadTafsir(id, surah) {
+  const key = 'taf-' + id + '-' + surah;
+  if (tafMem.has(key)) return tafMem.get(key);
+  let arr = await DB.get(key, 'kv');
+  if (!Array.isArray(arr) || !arr.length) {
+    const t = tafInfo(id);
+    const r = await fetch(t.local ? `tafsir/${t.id}/${surah}.json` : `${TAF_CDN}${t.id}/${surah}.json`);
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const j = await r.json();
+    if (Array.isArray(j) && typeof j[0] !== 'object') arr = j;
+    else {
+      const list = Array.isArray(j) ? j : (j.ayahs || []);
+      arr = new Array(SURAHS[surah - 1].count).fill('');
+      for (const x of list) if (x && x.ayah >= 1 && x.ayah <= arr.length) arr[x.ayah - 1] = String(x.text || '');
+    }
+    if (!t.local) DB.set(key, arr, 'kv');
+  }
+  if (tafMem.size > 6) tafMem.delete(tafMem.keys().next().value);
+  tafMem.set(key, arr);
+  return arr;
+}
+/* Some tafsirs explain several ayahs together: the same text is repeated for each of them */
+function tafGroup(arr, a) {
+  let g1 = a, g2 = a; const t = arr[a - 1];
+  if (!t) return [a, a];
+  while (g1 > 1 && arr[g1 - 2] === t) g1--;
+  while (g2 < arr.length && arr[g2] === t) g2++;
+  return [g1, g2];
+}
+function tafParas(text, lang) {
+  return String(text).split(/\n+/).map(s => s.trim()).filter(Boolean).map(s => `<p dir="auto" lang="${lang}">${esc(s)}</p>`).join('');
+}
+function tafSelectHTML(cls = '') {
+  return `<select class="tafsel ${cls}" aria-label="Choose tafsir">${TAFSIRS.map(t => `<option value="${t.id}" ${S.tafsir === t.id ? 'selected' : ''}>${t.bn} · ${t.name}</option>`).join('')}</select>`;
+}
+function openTafsir(verseEl) {
+  let cur = verseEl, token = 0;
+  openSheet(`<h2 style="margin-top:0">📘 Tafsir · <span class="bn">তাফসির</span></h2>
+    <label class="f">Choose a tafsir · <span class="bn">তাফসির বেছে নিন</span></label>${tafSelectHTML()}
+    <div id="tafAyah"></div><div id="tafBody" class="taf-body tr"></div>
+    <div class="row" style="justify-content:space-between;margin-top:8px"><button class="btn ghost" id="tafPrev">‹ Previous · <span class="bn">আগের</span></button><button class="btn" id="tafNext">Next · <span class="bn">পরের</span> ›</button></div>
+    <p class="note" id="tafCredit"></p>`, (sheet) => {
+    const all = () => [...$('#view').querySelectorAll('.verse[data-s]')];
+    const findV = (s, a) => $(`#view .verse[data-s="${s}"][data-a="${a}"]`);
+    let group = [1, 1];
+    async function show() {
+      const my = ++token, s = +cur.dataset.s, a = +cur.dataset.a, t = tafInfo(S.tafsir);
+      const v = (state.data && state.data.verses || []).find(x => x.s === s && x.a === a) || {};
+      sheet.querySelector('#tafCredit').textContent = t.level + ' — ' + t.credit;
+      sheet.querySelector('#tafBody').innerHTML = `<div class="loading" style="padding:20px"><div class="spinner"></div>Loading tafsir… <span class="bn">তাফসির লোড হচ্ছে…</span></div>`;
+      sheet.querySelector('#tafAyah').innerHTML = `<div class="taf-ayah"><b>${esc(SURAHS[s - 1].en)} ${s}:${a}</b> · <span class="bn">${esc(SURAHS[s - 1].bn)} ${bnNum(s)}:${bnNum(a)}</span>${v.ar && S.showAr ? `<div class="ar" lang="ar" dir="rtl">${esc(splitBism(v)[1] || v.ar)}</div>` : ''}${v.bn ? `<div class="tr" lang="bn">${esc(v.bn)}</div>` : ''}</div>`;
+      try {
+        const arr = await loadTafsir(t.id, s);
+        if (my !== token) return;
+        group = tafGroup(arr, a);
+        const text = arr[a - 1];
+        sheet.querySelector('#tafBody').innerHTML = (group[1] > group[0] ? `<div class="taf-group">Ayahs ${s}:${group[0]}–${group[1]} are explained together · <span class="bn">আয়াত ${bnNum(group[0])}–${bnNum(group[1])} এর তাফসির একসাথে</span></div>` : '')
+          + (text ? tafParas(text, t.lang) : `<p>No tafsir for this ayah in this book. Try another tafsir above.<br><span class="bn">এই আয়াতের তাফসির এই বইয়ে নেই। উপরে অন্য তাফসির বেছে নিন।</span></p>`);
+        sheet.querySelector('#tafBody').scrollTop = 0; sheet.scrollTop = 0;
+      } catch (e) {
+        if (my !== token) return;
+        sheet.querySelector('#tafBody').innerHTML = `<p><b>Could not load the tafsir.</b> Please check your internet connection.<br><span class="bn">তাফসির লোড করা যায়নি। ইন্টারনেট সংযোগ দেখে আবার চেষ্টা করুন।</span></p><p class="note">Once a surah's tafsir has opened, it is saved and works offline. Al-Mukhtasar always works offline.</p>`;
+      }
+      const vs = all(), i = vs.indexOf(cur);
+      const nextEl = findV(s, group[1] + 1) || (findV(s, group[1]) ? vs[vs.indexOf(findV(s, group[1])) + 1] : vs[i + 1]);
+      const prevEl = findV(s, group[0] - 1) || vs[vs.indexOf(findV(s, group[0]) || cur) - 1];
+      sheet.querySelector('#tafNext').disabled = !nextEl; sheet.querySelector('#tafPrev').disabled = !prevEl;
+      sheet.querySelector('#tafNext').onclick = () => { if (nextEl) { cur = nextEl; cur.scrollIntoView({ block: 'center' }); show(); } };
+      sheet.querySelector('#tafPrev').onclick = () => { if (prevEl) { cur = prevEl; cur.scrollIntoView({ block: 'center' }); show(); } };
+    }
+    sheet.querySelector('.tafsel').onchange = e => { S.tafsir = e.target.value; save(); show(); };
+    show();
+  });
 }
 
 /* ---------- display settings (shared by sheet & settings tab) ---------- */
@@ -1089,6 +1193,10 @@ async function renderSettings() {
   const have = (await DB.keys()).length;
   $('#view').innerHTML = `
   <div class="card">${displayControls()}</div>
+  <h2>Tafsir · <span class="bn">তাফসির</span></h2>
+  <div class="card"><p style="margin-top:0">Tap <b>📘 Tafsir</b> on any ayah to read its explanation.<br><span class="bn">যেকোনো আয়াতের পাশে “📘 Tafsir” চাপলে তার ব্যাখ্যা দেখতে পাবেন।</span></p>
+    <label class="f">Default tafsir · <span class="bn">পছন্দের তাফসির</span></label>${tafSelectHTML('setTaf')}
+    <p class="note">Al-Mukhtasar works offline. Other tafsirs download one surah at a time and are then saved on your phone.<br><span class="bn">আল-মুখতাসার অফলাইনে চলে। অন্যগুলো একবার খুললে ফোনে সেভ হয়ে যায়।</span></p></div>
   <h2>Offline reading · <span class="bn">অফলাইনে পড়া</span></h2>
   <div class="card">
     <p style="margin-top:0"><b id="haveN">${have}</b> of 30 Paras saved on this device.<br><span class="bn">অফলাইনে পড়ার জন্য সব পারা ডাউনলোড করুন।</span></p>
@@ -1100,8 +1208,9 @@ async function renderSettings() {
   <div class="card"><p style="margin-top:0">Send the Iqra app to family and friends.<br><span class="bn">পরিবার ও বন্ধুদের সাথে অ্যাপটি শেয়ার করুন।</span></p><button class="btn" data-share="app" style="width:100%">Share the app · <span class="bn">অ্যাপ শেয়ার করুন</span></button></div>
   <h2>Add to iPhone home screen</h2>
   <div class="card note">In Safari, tap the Share button, then <b>Add to Home Screen</b>. The app then opens full screen with its own icon.<br><span class="bn">Safari-তে Share বোতাম চাপুন, তারপর “Add to Home Screen” বেছে নিন।</span></div>
-  <div class="card note">Arabic text: Uthmani script. Bangla translation and Arabic text are downloaded from the Al-Quran Cloud API (alquran.cloud). Recitation: Mishary Rashid Alafasy, streamed from the Islamic Network CDN (cdn.islamic.network; EveryAyah.com recordings). Word timings: quran-align, © 2016 Collin Fair, CC BY 4.0 (creativecommons.org/licenses/by/4.0), github.com/cpfair/quran-align, split into one file per surah, provided without warranty. Prayer times are calculated on your device. Surah benefits use only authentic narrations (Bukhari, Muslim, or graded sahih/hasan), with references linked to sunnah.com. Sahih al-Bukhari (Arabic, English by Muhsin Khan, and Bangla) is downloaded from the open Hadith API by Fawaz Ahmed (github.com/fawazahmed0/hadith-api).</div>`;
+  <div class="card note">Arabic text: Uthmani script. Bangla translation and Arabic text are downloaded from the Al-Quran Cloud API (alquran.cloud). Recitation: Mishary Rashid Alafasy, streamed from the Islamic Network CDN (cdn.islamic.network; EveryAyah.com recordings). Word timings: quran-align, © 2016 Collin Fair, CC BY 4.0 (creativecommons.org/licenses/by/4.0), github.com/cpfair/quran-align, split into one file per surah, provided without warranty. Prayer times are calculated on your device. Surah benefits use only authentic narrations (Bukhari, Muslim, or graded sahih/hasan), with references linked to sunnah.com. Sahih al-Bukhari (Arabic, English by Muhsin Khan, and Bangla) is downloaded from the open Hadith API by Fawaz Ahmed (github.com/fawazahmed0/hadith-api). Tafsir: Al-Mukhtasar in Interpreting the Noble Quran (Bangla and English), Tafsir Center for Quranic Studies, from QuranEnc.com, reproduced without modification; Tafsir Ahsanul Bayaan (Bayaan Foundation), Tafsir Abu Bakr Zakaria (King Fahd Quran Printing Complex), Tafsir Ibn Kathir (Bangla: Tawheed Publication; English abridged), as published on quran.com, via github.com/spa5k/tafsir_api.</div>`;
   wireDisplay($('#view'));
+  $('#view .setTaf').onchange = e => { S.tafsir = e.target.value; save(); };
   $('#dlAll').onclick = async () => {
     const btn = $('#dlAll'); btn.disabled = true;
     let ok = 0, fail = 0;
