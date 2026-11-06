@@ -6,7 +6,7 @@
 
 Iqra is a free Islamic app for iPhone. It was made so that everyone can read and learn about their deen with comfort, including people with dyslexia and other reading difficulties.
 
-**Open the app:** https://rahimachy26.github.io/Path-of-Guidance/
+**Open the app:** https://rahimachy26.github.io/Iqra/
 
 ## The Holy Quran
 Read by **surah** (all 114, with English and Bangla names) or by **para** (all 30). Search for any surah by name, meaning or number, and star your favourite surahs to find them quickly. Before each surah that has an authentic virtue, a short **Benefits · ফজিলত** box explains it in English and Bangla, with the hadith reference (for example, reading Surah Al-Kahf on Friday). Only narrations from Bukhari, Muslim, or graded sahih/hasan are included.
