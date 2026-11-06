@@ -34,6 +34,9 @@ button{cursor:pointer}
 /* layout */
 header.top{position:sticky;top:0;z-index:20;background:var(--bg);padding:calc(var(--safe-top) + 10px) 16px 10px;border-bottom:2px solid var(--line);display:flex;align-items:center;gap:10px}
 header.top h1{font-size:1.15em;margin:0;flex:1;font-weight:600;line-height:1.3}
+header.top.reader{flex-wrap:wrap;row-gap:8px}
+header.top.reader h1{order:5;flex-basis:100%}
+header.top.reader #backBtn{margin-right:auto}
 header.top h1 small{display:block;font-weight:400;font-size:.8em;color:var(--muted)}
 .iconbtn{min-width:48px;min-height:48px;border-radius:14px;border:2px solid var(--line);background:var(--card);display:inline-flex;align-items:center;justify-content:center;font-weight:600;padding:0 12px}
 main{padding:16px 16px calc(110px + var(--safe-bot));max-width:760px;margin:0 auto}
@@ -118,7 +121,7 @@ input[type=range]{width:100%;height:40px;accent-color:var(--accent)}
 .verse .lang{display:block;font-size:.72em;font-weight:600;color:var(--muted);letter-spacing:.04em;margin-top:12px}
 .books{list-style:none;margin:0;padding:0}
 .books li button{width:100%;text-align:left;display:flex;gap:14px;align-items:center;border:2px solid var(--line);background:var(--card);border-radius:16px;padding:12px 14px;margin-bottom:10px;min-height:60px}
-.books .bn-no{min-width:2.4em;height:2.4em;border-radius:12px;background:var(--accent-soft);color:var(--accent);font-weight:600;display:flex;align-items:center;justify-content:center}
+.bn-no{min-width:2.4em;height:2.4em;border-radius:12px;background:var(--accent-soft);color:var(--accent);font-weight:600;display:flex;align-items:center;justify-content:center}
 input.filter{margin-bottom:12px}
 /* ramadan */
 .rhero{background:var(--accent);color:#fff;border-color:var(--accent)}
@@ -135,6 +138,21 @@ details.info .bn{line-height:var(--lh)}
 .linkbtns{display:flex;flex-direction:column;gap:10px}
 .linkbtns .btn{text-align:left}
 tr.today td{background:var(--accent-soft)}
+
+/* surah list & benefits */
+.qtabs{margin:12px 0}
+.srow{display:flex;align-items:stretch;gap:8px;margin-bottom:10px}
+.srow .open{flex:1;text-align:left;display:flex;gap:14px;align-items:center;border:2px solid var(--line);background:var(--card);border-radius:16px;padding:10px 14px;min-height:64px}
+.srow .open small{display:block;color:var(--muted);font-size:.8em}
+.srow .star{width:54px;border:2px solid var(--line);background:var(--card);border-radius:16px;font-size:1.4em;color:var(--accent)}
+.star.on{background:var(--accent-soft)}
+details.benefit{border-color:var(--accent);background:var(--hl)}
+.bitem{border-top:2px dashed var(--line);padding-top:10px}
+.bitem:first-of-type{border-top:0;padding-top:0}
+.bitem p{margin:0 0 8px}
+.bref{font-size:.82em;color:var(--muted)}
+.bref a{color:var(--accent)}
+.empty{text-align:center;padding:30px 10px}
 
 /* sheet */
 .sheet-back{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:50;display:flex;align-items:flex-end;justify-content:center}
@@ -153,6 +171,7 @@ tr.today td{background:var(--accent-soft)}
 <header class="top" id="topbar">
   <button class="iconbtn hidden" id="backBtn" aria-label="Back">‹ Back</button>
   <h1 id="title">Quran · <span class="bn">কুরআন</span><small id="subtitle" class="bn">৩০ পারা · আরবি ও বাংলা অনুবাদ</small></h1>
+  <button class="iconbtn hidden" id="favBtn" aria-label="Favourite" title="Favourite">☆</button>
   <button class="iconbtn hidden" id="focusBtn" aria-label="Focus mode" title="Focus mode">Focus</button>
   <button class="iconbtn hidden" id="aaBtn" aria-label="Text settings">Aa</button>
 </header>
@@ -593,8 +612,14 @@ function splitBism(v) {
 /* ---------- app state & routing ---------- */
 const state = { view: 'quran', juz: null, data: null, focus: false, focusIdx: 0, observer: null };
 
-function setTop({ title, sub, back, reader }) {
+const favs = () => store.get('favs', []);
+const isFav = n => favs().includes(n);
+function toggleFav(n) { const f = favs(); const i = f.indexOf(n); i >= 0 ? f.splice(i, 1) : f.push(n); store.set('favs', f.sort((a, b) => a - b)); return i < 0; }
+function setTop({ title, sub, back, reader, fav }) {
+  $('#topbar').classList.toggle('reader', !!reader);
   $('#title').innerHTML = title + (sub ? `<small class="bn">${sub}</small>` : '');
+  const fb = $('#favBtn'); fb.classList.toggle('hidden', !fav);
+  if (fav) { const paint = () => { fb.textContent = isFav(fav) ? '★' : '☆'; fb.classList.toggle('star', true); fb.classList.toggle('on', isFav(fav)); }; paint(); fb.onclick = () => { toggleFav(fav); paint(); }; }
   $('#backBtn').classList.toggle('hidden', !back);
   $('#aaBtn').classList.toggle('hidden', !reader);
   $('#focusBtn').classList.toggle('hidden', !reader);
@@ -604,7 +629,7 @@ function selectTab(tab) {
 }
 function go(view, arg) {
   if (state.observer) { state.observer.disconnect(); state.observer = null; }
-  state.view = view; state.focus = false;
+  state.view = view; state.focus = false; $('#favBtn').classList.add('hidden');
   $('#focusbar').classList.add('hidden');
   $('#view').classList.remove('focus-on');
   applySettings();
@@ -616,42 +641,107 @@ function go(view, arg) {
   if (view === 'hadith') { selectTab('hadith'); renderBooks(); }
   if (view === 'book') { selectTab('hadith'); renderBook(arg); }
   if (view === 'ramadan') { selectTab('ramadan'); renderRamadan(); }
-  const hash = view === 'reader' ? 'para-' + arg.juz : view === 'book' ? 'bukhari-' + arg.n : view;
+  const hash = view === 'reader' ? (arg.surah ? 'surah-' + arg.surah : 'para-' + arg.juz) : view === 'book' ? 'bukhari-' + arg.n : view;
   try { history.replaceState(null, '', '#' + hash); } catch (e) {}
 }
 
-/* ---------- Quran list ---------- */
+/* ---------- Quran list: search, 114 surahs, 30 paras, favourites ---------- */
+const norm = t => String(t).toLowerCase().normalize('NFKD').replace(/[^a-z0-9ঀ-৿]/g, '').replace(/^(al|an|ar|as|at|ad|adh|az|ash)(?=[a-z]{3})/, '');
+function surahRow(m) {
+  return `<div class="srow"><button class="open" data-surah="${m.n}"><span class="bn-no">${m.n}</span><span><b>${esc(m.en)}</b> · <span class="bn">${esc(m.bn)}</span><small>${esc(m.mean)} · ${m.count} ayahs · Para ${juzFor(m.n, 1)}${BENEFITS[m.n] ? ' · ✨ benefits' : ''}</small></span></button>
+    <button class="star ${isFav(m.n) ? 'on' : ''}" data-fav="${m.n}" aria-label="Favourite">${isFav(m.n) ? '★' : '☆'}</button></div>`;
+}
+function paraCard(i) {
+  return `<button class="para" data-juz="${i}"><span class="num">${i} <span class="bn" style="font-size:.7em">· পারা ${bnNum(i)}</span></span><span class="nm">${esc(JUZ[i - 1])}</span><span class="dl" data-dl="${i}"></span></button>`;
+}
 async function renderList() {
-  setTop({ title: 'Quran · <span class="bn">কুরআন</span>', sub: '৩০ পারা · আরবি ও বাংলা অনুবাদ' });
+  setTop({ title: 'Quran · <span class="bn">কুরআন</span>', sub: '১১৪ সূরা · ৩০ পারা · আরবি ও বাংলা অনুবাদ' });
   const last = store.get('last', null);
-  const have = new Set(await DB.keys());
+  const tab = store.get('qtab', 'surah');
   let h = `<div class="card" style="text-align:center;background:var(--accent-soft)"><div style="font-size:1.35em;font-weight:600;color:var(--accent)">Path of Guidance</div><div class="bn" style="font-size:1.15em">হেদায়েতের পথ</div></div>`;
-  if (last) h += `<button class="card continue" id="cont"><span><b>Continue reading</b><br><span class="bn">পড়া চালিয়ে যান</span> — Para ${last.juz} · <span class="bn">পারা ${bnNum(last.juz)}</span><br><span class="muted">Surah ${last.s}, Ayah ${last.a}</span></span><span style="font-size:1.6em">›</span></button>`;
-  h += `<div class="paras">` + JUZ.map((nm, i) => `<button class="para" data-juz="${i + 1}"><span class="num">${i + 1} <span class="bn" style="font-size:.7em">· পারা ${bnNum(i + 1)}</span></span><span class="nm">${esc(nm)}</span><span class="dl">${have.has(i + 1) ? '✓ Saved for offline' : ''}</span></button>`).join('') + `</div>`;
+  if (last) {
+    const label = last.surah ? `Surah ${last.s}. ${esc(SURAHS[last.s - 1].en)} · <span class="bn">${esc(SURAHS[last.s - 1].bn)}</span>` : `Para ${last.juz} · <span class="bn">পারা ${bnNum(last.juz)}</span>`;
+    h += `<button class="card continue" id="cont"><span><b>Continue reading</b> · <span class="bn">পড়া চালিয়ে যান</span><br>${label}<br><span class="muted">Ayah ${last.s}:${last.a}</span></span><span style="font-size:1.6em">›</span></button>`;
+  }
+  h += `<input type="search" id="qs" placeholder="🔍 Search surah or para · সূরা খুঁজুন" autocomplete="off">
+    <div class="seg qtabs" id="qt"><button data-t="surah">Surah · <span class="bn">সূরা</span></button><button data-t="para">Para · <span class="bn">পারা</span></button><button data-t="fav">★ Favourites</button></div>
+    <div id="ql"></div>`;
   $('#view').innerHTML = h;
-  $('#view').querySelectorAll('.para').forEach(b => b.onclick = () => go('reader', { juz: +b.dataset.juz }));
-  if (last) $('#cont').onclick = () => go('reader', { juz: last.juz, id: last.id });
+  if (last) $('#cont').onclick = () => go('reader', last.surah ? { surah: last.surah, id: last.id } : { juz: last.juz, id: last.id });
+  const have = new Set(await DB.keys());
+  const draw = () => {
+    const q = $('#qs').value.trim(), t = store.get('qtab', 'surah');
+    $('#qt').querySelectorAll('button').forEach(b => b.classList.toggle('on', b.dataset.t === t));
+    let out = '';
+    if (q) {
+      const nq = norm(q);
+      const ss = SURAHS.filter(m => String(m.n) === q || norm(m.en).includes(nq) || m.bn.includes(q) || norm(m.mean).includes(nq) || bnNum(m.n) === q);
+      const pp = JUZ.map((nm, i) => i + 1).filter(i => String(i) === q.replace(/^(para|juz|পারা)\s*/i, '') || norm(JUZ[i - 1]).includes(nq));
+      out = (ss.length ? `<h2>Surahs · <span class="bn">সূরা</span></h2>` + ss.map(surahRow).join('') : '') +
+        (pp.length ? `<h2>Paras · <span class="bn">পারা</span></h2><div class="paras">${pp.map(paraCard).join('')}</div>` : '') ||
+        `<div class="empty muted">No surah or para matches “${esc(q)}”.<br><span class="bn">কিছু পাওয়া যায়নি।</span></div>`;
+    } else if (t === 'para') out = `<div class="paras">${JUZ.map((_, i) => paraCard(i + 1)).join('')}</div>`;
+    else if (t === 'fav') {
+      const f = favs();
+      out = f.length ? f.map(n => surahRow(SURAHS[n - 1])).join('') : `<div class="empty muted">No favourites yet. Tap ☆ next to a surah to add it here.<br><span class="bn">কোনো প্রিয় সূরা নেই। সূরার পাশে ☆ চাপুন।</span></div>`;
+    } else out = SURAHS.map(surahRow).join('');
+    $('#ql').innerHTML = out;
+    $('#ql').querySelectorAll('[data-dl]').forEach(el => { if (have.has(+el.dataset.dl)) el.textContent = '✓ Saved for offline'; });
+    $('#ql').querySelectorAll('[data-surah]').forEach(b => b.onclick = () => go('reader', { surah: +b.dataset.surah }));
+    $('#ql').querySelectorAll('[data-juz]').forEach(b => b.onclick = () => go('reader', { juz: +b.dataset.juz }));
+    $('#ql').querySelectorAll('[data-fav]').forEach(b => b.onclick = () => { toggleFav(+b.dataset.fav); draw(); });
+  };
+  $('#qt').querySelectorAll('button').forEach(b => b.onclick = () => { store.set('qtab', b.dataset.t); $('#qs').value = ''; draw(); });
+  $('#qs').oninput = draw;
+  draw();
+}
+
+/* Load one surah: from saved paras if available, otherwise from the API */
+async function loadSurah(n) {
+  const key = 'surah-' + n, m = SURAHS[n - 1];
+  const cached = await DB.get(key, 'kv');
+  if (cached && cached.verses && cached.verses.length) return cached;
+  const j1 = juzFor(n, 1), j2 = juzFor(n, m.count);
+  const parts = [];
+  for (let j = j1; j <= j2; j++) parts.push(await DB.get(j));
+  if (parts.every(Boolean)) {
+    const verses = parts.flatMap(p => p.verses).filter(v => v.s === n);
+    if (verses.length === m.count) return { surah: n, verses, surahs: { [n]: parts[0].surahs[n] || parts[parts.length - 1].surahs[n] }, credit: parts[0].credit };
+  }
+  const base = 'https://api.alquran.cloud/v1/surah/' + n + '/';
+  const [ar, bn] = await Promise.all([getJSON(base + 'quran-uthmani'), getJSON(base + 'bn.bengali')]);
+  const bnMap = new Map(bn.data.ayahs.map(a => [a.number, a.text]));
+  const d = ar.data;
+  const verses = d.ayahs.map(a => ({ id: a.number, s: n, a: a.numberInSurah, ar: String(a.text || '').replace(/^﻿/, ''), bn: bnMap.get(a.number) || '', sajda: !!a.sajda }));
+  const ed = bn.data.edition || {};
+  const data = { surah: n, verses, surahs: { [n]: { n, name: d.name, en: d.englishName, tr: d.englishNameTranslation, count: d.numberOfAyahs } }, credit: [ed.englishName, ed.name].filter(Boolean).join(' · ') };
+  await DB.set(key, data, 'kv');
+  return data;
 }
 
 /* ---------- Reader ---------- */
-async function renderReader({ juz, id, s: jumpS, a: jumpA }) {
-  state.juz = juz;
-  setTop({ title: `Para ${juz} · <span class="bn">পারা ${bnNum(juz)}</span>`, sub: JUZ[juz - 1], back: true, reader: true });
-  $('#view').innerHTML = `<div class="loading"><div class="spinner"></div>Loading Para ${juz}…<br><span class="bn">পারা ${bnNum(juz)} লোড হচ্ছে…</span></div>`;
+async function renderReader({ juz, surah, id, s: jumpS, a: jumpA }) {
+  state.juz = juz || null; state.surah = surah || null;
+  const sm = surah ? SURAHS[surah - 1] : null;
+  if (surah) setTop({ title: `${surah}. ${esc(sm.en)}`, sub: `${sm.bn} · ${sm.count} আয়াত`, back: true, reader: true, fav: surah });
+  else setTop({ title: `Para ${juz} · <span class="bn">পারা ${bnNum(juz)}</span>`, sub: JUZ[juz - 1], back: true, reader: true });
+  const what = surah ? `Surah ${esc(sm.en)}…<br><span class="bn">${esc(sm.bn)} লোড হচ্ছে…</span>` : `Para ${juz}…<br><span class="bn">পারা ${bnNum(juz)} লোড হচ্ছে…</span>`;
+  $('#view').innerHTML = `<div class="loading"><div class="spinner"></div>Loading ${what}</div>`;
   let data;
-  try { data = await loadJuz(juz); }
+  try { data = surah ? await loadSurah(surah) : await loadJuz(juz); }
   catch (e) {
     $('#view').innerHTML = `<div class="card"><b>Could not load this Para.</b><p class="bn">পারাটি লোড করা যায়নি। ইন্টারনেট সংযোগ দেখে আবার চেষ্টা করুন।</p><p class="note">Please check your internet connection. Once a Para has loaded once, it is saved and works offline.</p><button class="btn" id="retry">Try again · আবার চেষ্টা</button></div>`;
-    $('#retry').onclick = () => renderReader({ juz, id, s: jumpS, a: jumpA });
+    $('#retry').onclick = () => renderReader({ juz, surah, id, s: jumpS, a: jumpA });
     return;
   }
-  if (state.view !== 'reader' || state.juz !== juz) return;
+  if (state.view !== 'reader' || (surah ? state.surah !== surah : state.juz !== juz)) return;
   state.data = data;
   let h = '', first = true;
   for (const v of data.verses) {
     if (v.a === 1 || first) {
       const s = data.surahs[v.s] || {};
-      h += `<div class="surah-head"><div class="ar" lang="ar" dir="rtl">${esc(s.name || '')}</div><div class="en">${s.n}. ${esc(s.en || '')}</div><div class="muted">${esc(s.tr || '')} · ${s.count} ayahs${v.a !== 1 ? ' · continued from Ayah ' + v.a : ''}</div></div>`;
+      h += `<div class="surah-head"><div class="ar" lang="ar" dir="rtl">${esc(s.name || '')}</div><div class="en">${s.n}. ${esc(s.en || '')}</div><div class="muted">${esc(s.tr || '')} · ${s.count} ayahs${v.a !== 1 ? ' · continued from Ayah ' + v.a : ''}</div>${SURAHS[v.s - 1] ? `<div class="bn">${esc(SURAHS[v.s - 1].bn)}</div>` : ''}</div>`;
+      if (v.a === 1) h += benefitsHTML(v.s);
     }
     first = false;
     const [bism, rest] = splitBism(v);
@@ -663,10 +753,11 @@ async function renderReader({ juz, id, s: jumpS, a: jumpA }) {
     </article>`;
   }
   h += `<div class="card note">Arabic: Uthmani script. Bangla translation: ${esc(data.credit || 'bn.bengali')}. Text from the Al-Quran Cloud API (alquran.cloud).</div>`;
-  h += `<div class="row" style="justify-content:space-between">${juz > 1 ? `<button class="btn ghost" id="prevJ">‹ Para ${juz - 1}</button>` : '<span></span>'}${juz < 30 ? `<button class="btn" id="nextJ">Para ${juz + 1} ›</button>` : ''}</div>`;
+  if (surah) h += `<div class="row" style="justify-content:space-between">${surah > 1 ? `<button class="btn ghost" id="prevJ">‹ ${esc(SURAHS[surah - 2].en)}</button>` : '<span></span>'}${surah < 114 ? `<button class="btn" id="nextJ">${esc(SURAHS[surah].en)} ›</button>` : ''}</div>`;
+  else h += `<div class="row" style="justify-content:space-between">${juz > 1 ? `<button class="btn ghost" id="prevJ">‹ Para ${juz - 1}</button>` : '<span></span>'}${juz < 30 ? `<button class="btn" id="nextJ">Para ${juz + 1} ›</button>` : ''}</div>`;
   $('#view').innerHTML = h;
-  if ($('#prevJ')) $('#prevJ').onclick = () => go('reader', { juz: juz - 1 });
-  if ($('#nextJ')) $('#nextJ').onclick = () => go('reader', { juz: juz + 1 });
+  if ($('#prevJ')) $('#prevJ').onclick = () => go('reader', surah ? { surah: surah - 1 } : { juz: juz - 1 });
+  if ($('#nextJ')) $('#nextJ').onclick = () => go('reader', surah ? { surah: surah + 1 } : { juz: juz + 1 });
   $('#view').querySelectorAll('.verse').forEach((el, i) => el.onclick = () => { if (state.focus) setFocus(i); });
   const target = jumpS ? $(`#view .verse[data-s="${jumpS}"][data-a="${jumpA}"]`) : (id && document.getElementById('v' + id));
   if (target) { target.scrollIntoView(); if (jumpS) { target.style.borderColor = 'var(--accent)'; target.style.background = 'var(--hl)'; } }
@@ -675,7 +766,7 @@ async function renderReader({ juz, id, s: jumpS, a: jumpA }) {
     const vis = entries.filter(e => e.isIntersecting).map(e => e.target);
     if (!vis.length || state.focus) return;
     const el = vis[0];
-    store.set('last', { juz, id: +el.dataset.id, s: +el.dataset.s, a: +el.dataset.a });
+    store.set('last', surah ? { surah, id: +el.dataset.id, s: +el.dataset.s, a: +el.dataset.a } : { juz, id: +el.dataset.id, s: +el.dataset.s, a: +el.dataset.a });
   }, { rootMargin: '-25% 0px -65% 0px' });
   $('#view').querySelectorAll('.verse').forEach(el => io.observe(el));
   state.observer = io;
@@ -687,7 +778,7 @@ function setFocus(i) {
   vs.forEach((el, j) => el.classList.toggle('is-focus', j === state.focusIdx));
   const el = vs[state.focusIdx];
   el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-  if (state.view === 'reader') store.set('last', { juz: state.juz, id: +el.dataset.id, s: +el.dataset.s, a: +el.dataset.a });
+  if (state.view === 'reader') store.set('last', state.surah ? { surah: state.surah, id: +el.dataset.id, s: +el.dataset.s, a: +el.dataset.a } : { juz: state.juz, id: +el.dataset.id, s: +el.dataset.s, a: +el.dataset.a });
 }
 function toggleFocus() {
   state.focus = !state.focus;
@@ -810,13 +901,15 @@ function renderPrayer() {
     <div class="seg" id="clk"><button data-v="12" class="${!S.h24 ? 'on' : ''}">12-hour</button><button data-v="24" class="${S.h24 ? 'on' : ''}">24-hour</button></div>
     <p class="note">Times are calculated from the sun's position, so they can differ by a few minutes from your local mosque's timetable. Please follow your mosque if it is different.<br><span class="bn">সময়গুলো হিসাব করে বের করা — স্থানীয় মসজিদের সময়সূচির সাথে কয়েক মিনিট পার্থক্য হতে পারে।</span></p>
   </div>`;
+  $('#view').insertAdjacentHTML('beforeend', remindersCard('prayer'));
+  wireReminders(place, o);
   $('#chg').onclick = openPlacePicker;
   $('#mth').onchange = e => { S.method = e.target.value === place.method ? null : e.target.value; save(); renderPrayer(); };
   $('#hl').onchange = e => { S.highLat = e.target.value; save(); renderPrayer(); };
   $('#asrSeg').querySelectorAll('button').forEach(b => b.onclick = () => { S.asr = b.dataset.v === place.asr ? null : b.dataset.v; save(); renderPrayer(); });
   $('#clk').querySelectorAll('button').forEach(b => b.onclick = () => { S.h24 = b.dataset.v === '24'; save(); renderPrayer(); });
   clearTimeout(prayerTimer);
-  prayerTimer = setTimeout(() => { if (state.view === 'prayer' && !document.querySelector('.sheet-back')) renderPrayer(); }, 30000);
+  prayerTimer = setTimeout(function tick() { if (state.view !== 'prayer') return; if (document.querySelector('.sheet-back') || (document.activeElement && document.activeElement.closest && document.activeElement.closest('#remCard'))) { prayerTimer = setTimeout(tick, 30000); return; } renderPrayer(); }, 30000);
 }
 
 function refreshPlaceView() { state.view === 'ramadan' ? renderRamadan() : renderPrayer(); }
@@ -868,7 +961,7 @@ async function renderSettings() {
   </div>
   <h2>Add to iPhone home screen</h2>
   <div class="card note">In Safari, tap the Share button, then <b>Add to Home Screen</b>. The app then opens full screen with its own icon.<br><span class="bn">Safari-তে Share বোতাম চাপুন, তারপর “Add to Home Screen” বেছে নিন।</span></div>
-  <div class="card note">Arabic text: Uthmani script. Bangla translation and Arabic text are downloaded from the Al-Quran Cloud API (alquran.cloud). Prayer times are calculated on your device. Sahih al-Bukhari (Arabic, English by Muhsin Khan, and Bangla) is downloaded from the open Hadith API by Fawaz Ahmed (github.com/fawazahmed0/hadith-api).</div>`;
+  <div class="card note">Arabic text: Uthmani script. Bangla translation and Arabic text are downloaded from the Al-Quran Cloud API (alquran.cloud). Prayer times are calculated on your device. Surah benefits use only authentic narrations (Bukhari, Muslim, or graded sahih/hasan), with references linked to sunnah.com. Sahih al-Bukhari (Arabic, English by Muhsin Khan, and Bangla) is downloaded from the open Hadith API by Fawaz Ahmed (github.com/fawazahmed0/hadith-api).</div>`;
   wireDisplay($('#view'));
   $('#dlAll').onclick = async () => {
     const btn = $('#dlAll'); btn.disabled = true;
@@ -881,6 +974,157 @@ async function renderSettings() {
     }
     $('#dlMsg').textContent = fail ? `${fail} Para(s) failed — check your connection and tap again.` : 'All 30 Paras saved. You can now read offline. · সব পারা সংরক্ষিত হয়েছে।';
     btn.disabled = false;
+  };
+}
+
+/* ---------- 114 Surahs: [English, Bangla, meaning, ayahs] ---------- */
+const SURAHS = [
+["Al-Fatihah","আল-ফাতিহা","The Opening",7],["Al-Baqarah","আল-বাকারা","The Cow",286],["Al-Imran","আলে ইমরান","Family of Imran",200],["An-Nisa","আন-নিসা","The Women",176],["Al-Ma'idah","আল-মায়িদা","The Table Spread",120],["Al-An'am","আল-আনআম","The Cattle",165],["Al-A'raf","আল-আরাফ","The Heights",206],["Al-Anfal","আল-আনফাল","The Spoils of War",75],["At-Tawbah","আত-তাওবা","The Repentance",129],["Yunus","ইউনুস","Jonah",109],
+["Hud","হুদ","Hud",123],["Yusuf","ইউসুফ","Joseph",111],["Ar-Ra'd","আর-রাদ","The Thunder",43],["Ibrahim","ইবরাহিম","Abraham",52],["Al-Hijr","আল-হিজর","The Rocky Tract",99],["An-Nahl","আন-নাহল","The Bee",128],["Al-Isra","আল-ইসরা (বনী ইসরাঈল)","The Night Journey",111],["Al-Kahf","আল-কাহফ","The Cave",110],["Maryam","মারইয়াম","Mary",98],["Ta-Ha","ত্বা-হা","Ta-Ha",135],
+["Al-Anbiya","আল-আম্বিয়া","The Prophets",112],["Al-Hajj","আল-হজ্জ","The Pilgrimage",78],["Al-Mu'minun","আল-মুমিনুন","The Believers",118],["An-Nur","আন-নূর","The Light",64],["Al-Furqan","আল-ফুরকান","The Criterion",77],["Ash-Shu'ara","আশ-শুআরা","The Poets",227],["An-Naml","আন-নামল","The Ant",93],["Al-Qasas","আল-কাসাস","The Stories",88],["Al-Ankabut","আল-আনকাবুত","The Spider",69],["Ar-Rum","আর-রূম","The Romans",60],
+["Luqman","লুকমান","Luqman",34],["As-Sajdah","আস-সাজদা","The Prostration",30],["Al-Ahzab","আল-আহযাব","The Combined Forces",73],["Saba","সাবা","Sheba",54],["Fatir","ফাতির","The Originator",45],["Ya-Sin","ইয়াসিন","Ya-Sin",83],["As-Saffat","আস-সাফফাত","Those Ranged in Ranks",182],["Sad","সোয়াদ","Sad",88],["Az-Zumar","আয-যুমার","The Groups",75],["Ghafir","গাফির (আল-মুমিন)","The Forgiver",85],
+["Fussilat","ফুসসিলাত","Explained in Detail",54],["Ash-Shura","আশ-শূরা","The Consultation",53],["Az-Zukhruf","আয-যুখরুফ","The Ornaments of Gold",89],["Ad-Dukhan","আদ-দুখান","The Smoke",59],["Al-Jathiyah","আল-জাসিয়া","The Kneeling",37],["Al-Ahqaf","আল-আহকাফ","The Sand Dunes",35],["Muhammad","মুহাম্মাদ","Muhammad",38],["Al-Fath","আল-ফাতহ","The Victory",29],["Al-Hujurat","আল-হুজুরাত","The Rooms",18],["Qaf","ক্বাফ","Qaf",45],
+["Adh-Dhariyat","আয-যারিয়াত","The Winnowing Winds",60],["At-Tur","আত-তূর","The Mount",49],["An-Najm","আন-নাজম","The Star",62],["Al-Qamar","আল-কামার","The Moon",55],["Ar-Rahman","আর-রহমান","The Most Merciful",78],["Al-Waqi'ah","আল-ওয়াকিয়া","The Inevitable",96],["Al-Hadid","আল-হাদিদ","The Iron",29],["Al-Mujadilah","আল-মুজাদালা","The Pleading Woman",22],["Al-Hashr","আল-হাশর","The Exile",24],["Al-Mumtahanah","আল-মুমতাহিনা","She That Is Examined",13],
+["As-Saff","আস-সাফ","The Ranks",14],["Al-Jumu'ah","আল-জুমুআ","Friday",11],["Al-Munafiqun","আল-মুনাফিকুন","The Hypocrites",11],["At-Taghabun","আত-তাগাবুন","Mutual Loss and Gain",18],["At-Talaq","আত-তালাক","The Divorce",12],["At-Tahrim","আত-তাহরিম","The Prohibition",12],["Al-Mulk","আল-মুলক","The Sovereignty",30],["Al-Qalam","আল-কলম","The Pen",52],["Al-Haqqah","আল-হাক্কাহ","The Reality",52],["Al-Ma'arij","আল-মাআরিজ","The Ascending Stairways",44],
+["Nuh","নূহ","Noah",28],["Al-Jinn","আল-জিন","The Jinn",28],["Al-Muzzammil","আল-মুযযাম্মিল","The Enshrouded One",20],["Al-Muddaththir","আল-মুদ্দাসসির","The Cloaked One",56],["Al-Qiyamah","আল-কিয়ামাহ","The Resurrection",40],["Al-Insan","আল-ইনসান (আদ-দাহর)","Man",31],["Al-Mursalat","আল-মুরসালাত","Those Sent Forth",50],["An-Naba","আন-নাবা","The Tidings",40],["An-Nazi'at","আন-নাযিআত","Those Who Drag Forth",46],["Abasa","আবাসা","He Frowned",42],
+["At-Takwir","আত-তাকভীর","The Overthrowing",29],["Al-Infitar","আল-ইনফিতার","The Cleaving",19],["Al-Mutaffifin","আল-মুতাফফিফীন","Those Who Defraud",36],["Al-Inshiqaq","আল-ইনশিকাক","The Splitting Open",25],["Al-Buruj","আল-বুরূজ","The Constellations",22],["At-Tariq","আত-তারিক","The Night Comer",17],["Al-A'la","আল-আলা","The Most High",19],["Al-Ghashiyah","আল-গাশিয়া","The Overwhelming",26],["Al-Fajr","আল-ফজর","The Dawn",30],["Al-Balad","আল-বালাদ","The City",20],
+["Ash-Shams","আশ-শামস","The Sun",15],["Al-Layl","আল-লাইল","The Night",21],["Ad-Duha","আদ-দুহা","The Morning Hours",11],["Ash-Sharh","আশ-শারহ (আলাম নাশরাহ)","The Relief",8],["At-Tin","আত-তীন","The Fig",8],["Al-Alaq","আল-আলাক","The Clinging Clot",19],["Al-Qadr","আল-কদর","The Night of Decree",5],["Al-Bayyinah","আল-বাইয়্যিনাহ","The Clear Proof",8],["Az-Zalzalah","আয-যিলযাল","The Earthquake",8],["Al-Adiyat","আল-আদিয়াত","The Chargers",11],
+["Al-Qari'ah","আল-কারিআ","The Calamity",11],["At-Takathur","আত-তাকাসুর","Competition in Increase",8],["Al-Asr","আল-আসর","The Time",3],["Al-Humazah","আল-হুমাযা","The Slanderer",9],["Al-Fil","আল-ফীল","The Elephant",5],["Quraysh","কুরাইশ","Quraysh",4],["Al-Ma'un","আল-মাউন","Small Kindnesses",7],["Al-Kawthar","আল-কাওসার","Abundance",3],["Al-Kafirun","আল-কাফিরুন","The Disbelievers",6],["An-Nasr","আন-নাসর","The Help",3],
+["Al-Masad","আল-মাসাদ (লাহাব)","The Palm Fibre",5],["Al-Ikhlas","আল-ইখলাস","Sincerity",4],["Al-Falaq","আল-ফালাক","The Daybreak",5],["An-Nas","আন-নাস","Mankind",6],
+].map(([en, bn, mean, count], i) => ({ n: i + 1, en, bn, mean, count }));
+// first verse of each Para (surah, ayah) — Tanzil juz boundaries
+const JUZ_START = [[1,1],[2,142],[2,253],[3,93],[4,24],[4,148],[5,82],[6,111],[7,88],[8,41],[9,93],[11,6],[12,53],[15,1],[17,1],[18,75],[21,1],[23,1],[25,21],[27,56],[29,46],[33,31],[36,28],[39,32],[41,47],[46,1],[51,31],[58,1],[67,1],[78,1]];
+const juzFor = (s, a) => { let j = 1; JUZ_START.forEach(([ss, aa], i) => { if (s > ss || (s === ss && a >= aa)) j = i + 1; }); return j; };
+
+/* ---------- Authentic benefits (fada'il) of surahs ----------
+   Only narrations in Sahih al-Bukhari / Sahih Muslim, or graded sahih/hasan by recognised scholars.
+   Popular virtues that come only from weak narrations are deliberately left out. */
+const B = (en, bn, ref, link) => ({ en, bn, ref, link });
+const BENEFITS = {
+  1: [B('The greatest surah in the Quran: the seven oft-repeated verses.', 'কুরআনের সবচেয়ে মহান সূরা — বারবার পঠিত সাতটি আয়াত।', 'Sahih al-Bukhari 4474', 'bukhari:4474'),
+      B('Al-Fatihah and the last verses of Al-Baqarah are two lights given to this Ummah; whoever recites a letter of them will be given what it asks.', 'সূরা ফাতিহা ও সূরা বাকারার শেষ আয়াতগুলো দুটি নূর; এর প্রতিটি অক্ষর পড়লে তার প্রার্থিত বিষয় দেওয়া হবে।', 'Sahih Muslim 806', 'muslim:806')],
+  2: [B('Shaytan runs away from a house in which Surah Al-Baqarah is recited.', 'যে ঘরে সূরা বাকারা পড়া হয়, শয়তান সেই ঘর থেকে পালিয়ে যায়।', 'Sahih Muslim 780', 'muslim:780'),
+      B('Al-Baqarah and Al-Imran will come on the Day of Resurrection like two clouds, pleading for those who recited them.', 'কিয়ামতের দিন সূরা বাকারা ও আলে ইমরান দুটি মেঘের মতো এসে তাদের পাঠকারীর পক্ষে সুপারিশ করবে।', 'Sahih Muslim 804', 'muslim:804'),
+      B('Ayat al-Kursi (2:255) is the greatest verse in the Book of Allah.', 'আয়াতুল কুরসি (২:২৫৫) আল্লাহর কিতাবের সবচেয়ে মহান আয়াত।', 'Sahih Muslim 810', 'muslim:810'),
+      B('Reciting Ayat al-Kursi when going to bed: a guard from Allah protects you all night and Shaytan cannot come near you until morning.', 'ঘুমানোর সময় আয়াতুল কুরসি পড়লে সারা রাত আল্লাহর পক্ষ থেকে একজন রক্ষক থাকে এবং সকাল পর্যন্ত শয়তান কাছে আসতে পারে না।', 'Sahih al-Bukhari 5010', 'bukhari:5010'),
+      B('Whoever recites the last two verses of Al-Baqarah at night, they will be enough for him.', 'যে ব্যক্তি রাতে সূরা বাকারার শেষ দুই আয়াত পড়বে, তা তার জন্য যথেষ্ট হবে।', 'Sahih al-Bukhari 5009', 'bukhari:5009')],
+  3: [B('Al-Imran and Al-Baqarah, "the two bright ones", will plead for their reciters on the Day of Resurrection.', 'আলে ইমরান ও বাকারা — "দুটি উজ্জ্বল সূরা" — কিয়ামতের দিন পাঠকারীর পক্ষে সুপারিশ করবে।', 'Sahih Muslim 804', 'muslim:804'),
+      B('The Prophet ﷺ recited the last ten verses of Al-Imran when he woke at night.', 'নবী ﷺ রাতে ঘুম থেকে উঠে সূরা আলে ইমরানের শেষ দশ আয়াত পড়তেন।', 'Sahih al-Bukhari 183', 'bukhari:183')],
+  17: [B('The Prophet ﷺ would not sleep until he had recited Surah Al-Isra (Bani Isra\'il) and Surah Az-Zumar.', 'নবী ﷺ সূরা বনী ইসরাঈল ও সূরা যুমার না পড়ে ঘুমাতেন না।', 'Jami\' at-Tirmidhi 2920 (sahih, al-Albani)', 'tirmidhi:2920')],
+  18: [B('Whoever reads Surah Al-Kahf on Friday, a light will shine for him between the two Fridays.', 'যে ব্যক্তি জুমার দিন সূরা কাহফ পড়বে, দুই জুমার মাঝের সময় তার জন্য নূর উজ্জ্বল থাকবে।', 'al-Hakim & al-Bayhaqi; sahih per al-Albani (Sahih al-Jami\' 6470)', ''),
+       B('Whoever memorises the first ten verses of Surah Al-Kahf will be protected from the Dajjal.', 'যে ব্যক্তি সূরা কাহফের প্রথম দশ আয়াত মুখস্থ করবে, সে দাজ্জাল থেকে রক্ষা পাবে।', 'Sahih Muslim 809', 'muslim:809')],
+  32: [B('The Prophet ﷺ would not sleep until he had recited As-Sajdah and Al-Mulk.', 'নবী ﷺ সূরা সাজদা ও সূরা মুলক না পড়ে ঘুমাতেন না।', 'Jami\' at-Tirmidhi 2892', 'tirmidhi:2892'),
+       B('The Prophet ﷺ recited As-Sajdah and Al-Insan in the Fajr prayer on Fridays.', 'নবী ﷺ জুমার দিন ফজরের নামাজে সূরা সাজদা ও সূরা ইনসান পড়তেন।', 'Sahih al-Bukhari 891', 'bukhari:891')],
+  39: [B('The Prophet ﷺ would not sleep until he had recited Surah Az-Zumar and Surah Al-Isra.', 'নবী ﷺ সূরা যুমার ও সূরা বনী ইসরাঈল না পড়ে ঘুমাতেন না।', 'Jami\' at-Tirmidhi 2920 (sahih, al-Albani)', 'tirmidhi:2920')],
+  48: [B('The Prophet ﷺ said: "A surah was revealed to me tonight that is more beloved to me than everything the sun rises over."', 'নবী ﷺ বলেছেন: "আজ রাতে আমার উপর এমন একটি সূরা নাজিল হয়েছে যা সূর্যের নিচের সবকিছুর চেয়ে আমার কাছে প্রিয়।"', 'Sahih al-Bukhari 4833', 'bukhari:4833')],
+  62: [B('The Prophet ﷺ recited Al-Jumu\'ah and Al-Munafiqun in the Friday prayer.', 'নবী ﷺ জুমার নামাজে সূরা জুমুআ ও সূরা মুনাফিকুন পড়তেন।', 'Sahih Muslim 879', 'muslim:879')],
+  63: [B('The Prophet ﷺ recited Al-Jumu\'ah and Al-Munafiqun in the Friday prayer.', 'নবী ﷺ জুমার নামাজে সূরা জুমুআ ও সূরা মুনাফিকুন পড়তেন।', 'Sahih Muslim 879', 'muslim:879')],
+  67: [B('A surah of thirty verses will intercede for its reader until he is forgiven: Surah Al-Mulk.', 'ত্রিশ আয়াতের একটি সূরা তার পাঠকারীর জন্য সুপারিশ করবে যতক্ষণ না তাকে ক্ষমা করা হয় — সেটি সূরা মুলক।', 'Abu Dawud 1400; Tirmidhi 2891 (hasan)', 'abudawud:1400'),
+       B('The Prophet ﷺ would not sleep until he had recited As-Sajdah and Al-Mulk.', 'নবী ﷺ সূরা সাজদা ও সূরা মুলক না পড়ে ঘুমাতেন না।', 'Jami\' at-Tirmidhi 2892', 'tirmidhi:2892')],
+  76: [B('The Prophet ﷺ recited As-Sajdah and Al-Insan in the Fajr prayer on Fridays.', 'নবী ﷺ জুমার দিন ফজরের নামাজে সূরা সাজদা ও সূরা ইনসান পড়তেন।', 'Sahih al-Bukhari 891', 'bukhari:891')],
+  87: [B('The Prophet ﷺ recited Al-A\'la and Al-Ghashiyah in the Eid prayers and the Friday prayer.', 'নবী ﷺ দুই ঈদের নামাজে ও জুমার নামাজে সূরা আলা ও সূরা গাশিয়া পড়তেন।', 'Sahih Muslim 878', 'muslim:878')],
+  88: [B('The Prophet ﷺ recited Al-A\'la and Al-Ghashiyah in the Eid prayers and the Friday prayer.', 'নবী ﷺ দুই ঈদের নামাজে ও জুমার নামাজে সূরা আলা ও সূরা গাশিয়া পড়তেন।', 'Sahih Muslim 878', 'muslim:878')],
+  109: [B('Recite Al-Kafirun before sleeping, for it is a declaration of freedom from shirk.', 'ঘুমানোর আগে সূরা কাফিরুন পড়ুন, কারণ এটি শিরক থেকে মুক্তির ঘোষণা।', 'Sunan Abi Dawud 5055 (sahih, al-Albani)', 'abudawud:5055')],
+  112: [B('Surah Al-Ikhlas is equal to one third of the Quran.', 'সূরা ইখলাস কুরআনের এক-তৃতীয়াংশের সমান।', 'Sahih al-Bukhari 5013', 'bukhari:5013'),
+        B('Every night before sleeping, the Prophet ﷺ recited Al-Ikhlas, Al-Falaq and An-Nas into his hands and wiped over his body, three times.', 'প্রতি রাতে ঘুমানোর আগে নবী ﷺ সূরা ইখলাস, ফালাক ও নাস পড়ে হাতে ফুঁ দিয়ে শরীরে মুছতেন — তিনবার।', 'Sahih al-Bukhari 5017', 'bukhari:5017')],
+  113: [B('Verses were revealed the like of which have never been seen: Al-Falaq and An-Nas — the best surahs for seeking Allah\'s protection.', 'এমন আয়াত নাজিল হয়েছে যার মতো আগে দেখা যায়নি — সূরা ফালাক ও নাস, আল্লাহর আশ্রয় চাওয়ার শ্রেষ্ঠ সূরা।', 'Sahih Muslim 814', 'muslim:814'),
+        B('The Prophet ﷺ recited Al-Ikhlas, Al-Falaq and An-Nas every night before sleeping.', 'নবী ﷺ প্রতি রাতে ঘুমানোর আগে সূরা ইখলাস, ফালাক ও নাস পড়তেন।', 'Sahih al-Bukhari 5017', 'bukhari:5017')],
+  114: [B('Verses were revealed the like of which have never been seen: Al-Falaq and An-Nas — the best surahs for seeking Allah\'s protection.', 'এমন আয়াত নাজিল হয়েছে যার মতো আগে দেখা যায়নি — সূরা ফালাক ও নাস, আল্লাহর আশ্রয় চাওয়ার শ্রেষ্ঠ সূরা।', 'Sahih Muslim 814', 'muslim:814'),
+        B('The Prophet ﷺ recited Al-Ikhlas, Al-Falaq and An-Nas every night before sleeping.', 'নবী ﷺ প্রতি রাতে ঘুমানোর আগে সূরা ইখলাস, ফালাক ও নাস পড়তেন।', 'Sahih al-Bukhari 5017', 'bukhari:5017')],
+};
+function benefitsHTML(n) {
+  const list = BENEFITS[n];
+  if (!list) return '';
+  return `<details class="info benefit" open><summary><span>✨ Benefits of this surah · <span class="bn">এই সূরার ফজিলত</span></span></summary>
+    ${list.map(b => `<div class="bitem"><p>${esc(b.en)}</p><p class="bn">${esc(b.bn)}</p><p class="bref">📚 ${b.link ? `<a href="https://sunnah.com/${b.link}" target="_blank" rel="noopener">${esc(b.ref)}</a>` : esc(b.ref)}</p></div>`).join('')}
+  </details>`;
+}
+
+/* ---------- Reminders via the iPhone Calendar (.ics) ----------
+   Calendar alerts ring even when the app is closed, with no server needed. */
+function icsDate(d) { return d.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, ''); }
+function icsEsc(s) { return String(s).replace(/\\/g, '\\\\').replace(/;/g, '\;').replace(/,/g, '\\,').replace(/\n/g, '\\n'); }
+function icsFold(line) {
+  const enc = new TextEncoder(); const out = []; let cur = '', bytes = 0;
+  for (const ch of line) { const b = enc.encode(ch).length; if (bytes + b > 73) { out.push(cur); cur = ' '; bytes = 1; } cur += ch; bytes += b; }
+  out.push(cur); return out.join('\r\n');
+}
+function buildICS(events) {
+  const now = icsDate(new Date());
+  const L = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Path of Guidance//EN', 'CALSCALE:GREGORIAN', 'METHOD:PUBLISH', 'X-WR-CALNAME:Path of Guidance'];
+  events.forEach((e, i) => {
+    L.push('BEGIN:VEVENT', `UID:pog-${e.start.getTime()}-${i}-${Math.random().toString(36).slice(2, 8)}@path-of-guidance`, `DTSTAMP:${now}`,
+      `DTSTART:${icsDate(e.start)}`, `DTEND:${icsDate(new Date(e.start.getTime() + (e.mins || 10) * 60000))}`,
+      `SUMMARY:${icsEsc(e.title)}`, `DESCRIPTION:${icsEsc(e.desc || '')}`);
+    if (e.location) L.push(`LOCATION:${icsEsc(e.location)}`);
+    if (e.rrule) L.push(`RRULE:${e.rrule}`);
+    L.push('BEGIN:VALARM', 'ACTION:DISPLAY', `DESCRIPTION:${icsEsc(e.title)}`, `TRIGGER:-PT${e.before || 0}M`, 'END:VALARM', 'END:VEVENT');
+  });
+  L.push('END:VCALENDAR');
+  return L.map(icsFold).join('\r\n') + '\r\n';
+}
+function downloadICS(filename, events) {
+  const blob = new Blob([buildICS(events)], { type: 'text/calendar;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url; a.download = filename; document.body.appendChild(a); a.click();
+  setTimeout(() => { a.remove(); URL.revokeObjectURL(url); }, 4000);
+}
+const PRAYER_NAMES = { fajr: 'Fajr · ফজর', dhuhr: 'Dhuhr · যোহর', asr: 'Asr · আসর', maghrib: 'Maghrib · মাগরিব', isha: 'Isha · এশা' };
+function prayerEvents(place, o, days, before, which) {
+  const today = PT.localYMD(place.tz), ev = [];
+  for (let i = 0; i < days; i++) {
+    const d = addDays(today, i), t = PT.forDate(d.y, d.m, d.d, place, o);
+    for (const k of which) if (t[k] && t[k] > new Date()) ev.push({ start: t[k], title: `🕌 ${PRAYER_NAMES[k]}`, desc: `Prayer time in ${place.city} — Path of Guidance`, location: `${place.city}, ${place.country}`, before });
+  }
+  return ev;
+}
+function ramadanEvents(place, o, R, before) {
+  const ev = [];
+  for (const x of R.days) {
+    const d = x.date, t = PT.forDate(d.getUTCFullYear(), d.getUTCMonth() + 1, d.getUTCDate(), place, o);
+    if (t.fajr && t.fajr > new Date()) ev.push({ start: t.fajr, title: '🌙 Sehri ends · সেহরির শেষ সময়', desc: `Stop eating by Fajr. ${place.city} — Path of Guidance`, location: `${place.city}, ${place.country}`, before: Math.max(before, 30) });
+    if (t.maghrib && t.maghrib > new Date()) ev.push({ start: t.maghrib, title: '🌅 Iftar · ইফতার', desc: `Time to open your fast. ${place.city} — Path of Guidance`, location: `${place.city}, ${place.country}`, before });
+  }
+  return ev;
+}
+function kahfEvent(place, hour) {
+  // next Friday at the chosen local hour, repeating weekly
+  const today = PT.localYMD(place.tz);
+  const dow = new Date(Date.UTC(today.y, today.m - 1, today.d)).getUTCDay();
+  const d = addDays(today, (5 - dow + 7) % 7);
+  // find the UTC instant for hour:00 local time on that date
+  const guess = Date.UTC(d.y, d.m - 1, d.d, hour);
+  const p = new Intl.DateTimeFormat('en-GB', { timeZone: place.tz, year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric', hourCycle: 'h23' }).formatToParts(new Date(guess));
+  const g = t => +p.find(x => x.type === t).value;
+  const off = Date.UTC(g('year'), g('month') - 1, g('day'), g('hour'), g('minute')) - guess;
+  return { start: new Date(guess - off), title: '📖 Read Surah Al-Kahf · সূরা কাহফ', desc: 'Friday reminder: a light between the two Fridays. Open Path of Guidance → Quran → Al-Kahf.', rrule: 'FREQ=WEEKLY;BYDAY=FR', before: 0, mins: 30 };
+}
+function remindersCard(context) {
+  const ram = context === 'ramadan';
+  return `<div class="card" id="remCard">
+    <h2 style="margin-top:0">🔔 Reminders · <span class="bn">রিমাইন্ডার</span></h2>
+    <p class="note" style="margin-top:0">Adds alerts to your iPhone Calendar, so they ring even when the app is closed. Tap the button, then <b>Add All</b>.<br><span class="bn">আপনার আইফোনের ক্যালেন্ডারে অ্যালার্ট যোগ হবে — অ্যাপ বন্ধ থাকলেও বাজবে।</span></p>
+    ${ram ? '' : `<div class="toggle"><span>5 daily prayers · <span class="bn">পাঁচ ওয়াক্ত নামাজ</span></span><input type="checkbox" id="rP" checked></div>`}
+    <div class="toggle"><span>Sehri &amp; Iftar (Ramadan) · <span class="bn">সেহরি ও ইফতার</span></span><input type="checkbox" id="rR" ${ram ? 'checked' : ''}></div>
+    <div class="toggle"><span>Surah Al-Kahf every Friday · <span class="bn">প্রতি শুক্রবার সূরা কাহফ</span></span><input type="checkbox" id="rK"></div>
+    ${ram ? '' : `<label class="f">How many days of prayer alerts</label><select id="rD"><option value="7">7 days</option><option value="14">14 days</option><option value="30" selected>30 days</option></select>`}
+    <label class="f">Alert me</label>
+    <select id="rB"><option value="0">At the time</option><option value="5">5 minutes before</option><option value="10" selected>10 minutes before</option><option value="15">15 minutes before</option><option value="30">30 minutes before</option></select>
+    <button class="btn" id="rGo" style="width:100%;margin-top:14px">Add to my Calendar · <span class="bn">ক্যালেন্ডারে যোগ করুন</span></button>
+    <p class="note" id="rMsg"></p>
+    <p class="note">Sehri alerts come at least 30 minutes early. Add prayer alerts again each month (times change). To remove them, delete the events in the Calendar app.</p>
+  </div>`;
+}
+function wireReminders(place, o) {
+  const g = id => document.getElementById(id);
+  g('rGo').onclick = () => {
+    const before = +g('rB').value; let ev = [];
+    if (g('rP') && g('rP').checked) ev = ev.concat(prayerEvents(place, o, +g('rD').value, before, ['fajr', 'dhuhr', 'asr', 'maghrib', 'isha']));
+    if (g('rR').checked) { const R = ramadanPeriod(PT.localYMD(place.tz)); if (R) ev = ev.concat(ramadanEvents(place, o, R, before)); }
+    if (g('rK').checked) ev.push(kahfEvent(place, 10));
+    if (!ev.length) { g('rMsg').textContent = 'Choose at least one reminder first.'; return; }
+    downloadICS('path-of-guidance-reminders.ics', ev);
+    g('rMsg').innerHTML = `${ev.length} reminders ready. If nothing opens, open this app in <b>Safari</b> and try again.`;
   };
 }
 
@@ -1030,7 +1274,7 @@ function renderRamadan() {
     h += `<div class="card note">Ramadan dates are not available on this device, but everything below still works.</div>`;
   }
   h += `<h2>Learn about Ramadan · <span class="bn">রমজান সম্পর্কে জানুন</span></h2>` +
-    RAMADAN_INFO.map(([en, bn, ten, tbn], i) => `<details class="info"${i === 0 ? ' open' : ''}><summary>${esc(en)} · <span class="bn">&nbsp;${esc(bn)}</span></summary><p>${esc(ten)}</p><p class="bn">${esc(tbn)}</p></details>`).join('');
+    RAMADAN_INFO.map(([en, bn, ten, tbn], i) => `<details class="info"${i === 0 ? ' open' : ''}><summary><span>${esc(en)} · <span class="bn">${esc(bn)}</span></span></summary><p>${esc(ten)}</p><p class="bn">${esc(tbn)}</p></details>`).join('');
   h += `<h2>Read more · <span class="bn">আরও পড়ুন</span></h2>
     <div class="linkbtns">
       <button class="btn ghost" data-go="q" data-j="2" data-s="2" data-a="183">📖 Quran 2:183–187 — the verses about fasting · <span class="bn">রোজার আয়াত</span></button>
@@ -1040,6 +1284,7 @@ function renderRamadan() {
       <button class="btn ghost" data-go="b" data-n="32">📜 Bukhari: ${esc(bookTitle(32))}</button>
     </div>`;
   $('#view').innerHTML = h;
+  if (R) { $('#view').querySelector('.linkbtns').insertAdjacentHTML('beforebegin', remindersCard('ramadan')); wireReminders(place, o); }
   if ($('#rchg')) $('#rchg').onclick = () => { openPlacePicker(); };
   $('#view').querySelectorAll('[data-go]').forEach(b => b.onclick = () => b.dataset.go === 'q' ? go('reader', { juz: +b.dataset.j, s: +b.dataset.s, a: +b.dataset.a }) : go('book', { n: +b.dataset.n }));
 }
@@ -1052,7 +1297,9 @@ $('#prevV').onclick = () => setFocus(state.focusIdx - 1);
 $('#nextV').onclick = () => setFocus(state.focusIdx + 1);
 $('#aaBtn').onclick = () => openSheet(displayControls(), root => wireDisplay(root, () => {
   if (state.view === 'book') { renderBook({ n: state.book }); return; }
-  const l = store.get('last', null); renderReader({ juz: state.juz, id: l && l.juz === state.juz ? l.id : null });
+  const l = store.get('last', null);
+  if (state.surah) renderReader({ surah: state.surah, id: l && l.surah === state.surah ? l.id : null });
+  else renderReader({ juz: state.juz, id: l && l.juz === state.juz ? l.id : null });
 }));
 const moveRuler = y => { const r = $('#ruler'); r.style.top = Math.max(60, y - r.offsetHeight / 2) + 'px'; };
 window.addEventListener('touchmove', e => { if (S.ruler && state.view === 'reader') moveRuler(e.touches[0].clientY); }, { passive: true });
@@ -1064,6 +1311,7 @@ applySettings();
   const h = location.hash.slice(1);
   const m = h.match(/^para-(\d+)$/);
   if (m && +m[1] >= 1 && +m[1] <= 30) go('reader', { juz: +m[1] });
+  else if (/^surah-\d+$/.test(h) && +h.split('-')[1] >= 1 && +h.split('-')[1] <= 114) go('reader', { surah: +h.split('-')[1] });
   else if (/^bukhari-\d+$/.test(h)) go('book', { n: +h.split('-')[1] });
   else if (['prayer', 'settings', 'hadith', 'ramadan'].includes(h)) go(h);
   else go('quran');

@@ -5,6 +5,8 @@ Path of Guidance is a free Islamic app for iPhone. It was made so that everyone 
 **Open the app:** https://rahimachy26.github.io/Path-of-Guidance/
 
 ## The Holy Quran
+Read by **surah** (all 114, with English and Bangla names) or by **para** (all 30). Search for any surah by name, meaning or number, and star your favourite surahs to find them quickly. Before each surah that has an authentic virtue, a short **Benefits · ফজিলত** box explains it in English and Bangla, with the hadith reference (for example, reading Surah Al-Kahf on Friday). Only narrations from Bukhari, Muslim, or graded sahih/hasan are included.
+
 All 30 paras of the Quran in clear Arabic (Uthmani script), with the Bangla translation under every verse. Each surah has a heading with its name and number of ayahs. The app remembers where you stopped, so you can carry on from the same verse next time. Paras you have opened are saved on your phone and can be read without internet.
 
 ## Hadith: Sahih al-Bukhari
@@ -12,6 +14,9 @@ All 97 books of Sahih al-Bukhari, with each hadith in Arabic, English and Bangla
 
 ## Prayer times
 The five daily prayers and sunrise for over 100 countries, or for your own location. A countdown shows the next prayer, and a weekly timetable helps you plan ahead. You can choose the calculation method and the Asr timing (Standard or Hanafi) to match your local mosque.
+
+## Reminders
+Add alerts for the five daily prayers, sehri and iftar in Ramadan, and a weekly Friday reminder to read Surah Al-Kahf. They go into your iPhone Calendar, so they ring even when the app is closed.
 
 ## Ramadan
 A countdown to the next Ramadan, today's sehri and iftar times, and a full month's timetable for your city. Short explanations in English and Bangla cover fasting, Taraweeh, Laylatul Qadr, I'tikaf, Zakat al-Fitr and Eid.
