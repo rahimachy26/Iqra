@@ -19,6 +19,11 @@ All 97 books of Sahih al-Bukhari, with each hadith in Arabic, English and Bangla
 ## Prayer times
 The five daily prayers and sunrise for over 100 countries, or for your own location. A countdown shows the next prayer, and a weekly timetable helps you plan ahead. You can choose the calculation method and the Asr timing (Standard or Hanafi) to match your local mosque.
 
+## Learn: Ramadan, Laylatul Qadr, the Quran and Zakat
+Short, authentic lessons in English and Bangla, each with its source (hadith linked to sunnah.com, Quran verses open inside the app):
+- **Benefits of Ramadan** · **Laylatul Qadr** (with the dua taught to Aisha RA) · **How the Quran came** · **Benefits of reading the Quran** · **Zakat**
+- **Zakat calculator**: silver or gold nisab, today's price per gram, savings, gold, investments, business stock, money owed and debts, plus a fitrana calculator.
+
 ## Reminders
 Add alerts for the five daily prayers, sehri and iftar in Ramadan, and a weekly Friday reminder to read Surah Al-Kahf. They go into your iPhone Calendar, so they ring even when the app is closed.
 

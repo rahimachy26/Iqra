@@ -143,6 +143,20 @@ tr.today td{background:var(--accent-soft)}
 .sharebtn{float:right;display:inline-flex;align-items:center;gap:6px;border:2px solid var(--line);background:var(--bg);color:var(--accent);border-radius:999px;padding:4px 12px;min-height:40px;font-size:.8em;font-weight:600}
 .sharebtn svg{width:18px;height:18px}
 .toast{position:fixed;left:50%;bottom:calc(96px + var(--safe-bot));transform:translateX(-50%);background:var(--fg);color:var(--bg);padding:12px 18px;border-radius:14px;z-index:60;font-size:.9em;max-width:90vw;text-align:center;box-shadow:0 6px 18px rgba(0,0,0,.25)}
+/* ramadan categories */
+.chips{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
+.chip{border:2px solid var(--line);background:var(--card);border-radius:14px;padding:10px 8px;min-height:60px;font-weight:600;font-size:.88em;line-height:1.35}
+.chip .bn{font-weight:400}
+.chip.on{background:var(--accent);border-color:var(--accent);color:#fff}
+
+.zcalc{border-color:var(--accent)}
+.zcalc h3{margin:18px 0 4px}
+.zresult{margin-top:14px;padding:12px;border-radius:14px;background:var(--accent-soft);line-height:1.9}
+.zresult:empty{display:none}
+.zdue{font-size:1.25em;font-weight:600;color:var(--accent)}
+.zno{font-size:1em;color:var(--muted)}
+.ritem p{margin:0 0 8px;line-height:var(--lh)}
+.benefitdua{border-color:var(--accent);background:var(--hl)}
 /* brand */
 .brandcard{display:flex;align-items:center;gap:16px;background:var(--accent-soft);margin-bottom:10px}
 .sharehome{width:100%;display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:14px}
@@ -1295,6 +1309,132 @@ const RAMADAN_INFO = [
   ['Eid al-Fitr', 'ঈদুল ফিতর', 'Ramadan ends with Eid al-Fitr on the first day of Shawwal: a day of prayer, thanks and celebration.', 'রমজানের শেষে শাওয়াল মাসের প্রথম দিনে ঈদুল ফিতর — নামাজ, শুকরিয়া ও আনন্দের দিন।'],
 ];
 
+/* ---------- Ramadan learning categories (authentic sources only) ---------- */
+// link: 'bukhari:38' → sunnah.com ; 'q:2:183' → opens that verse inside Iqra
+const R_ITEM = (en, bn, ref, link) => ({ en, bn, ref, link });
+const RAMADAN_CATS = [
+  { id: 'basics', en: 'Ramadan basics', bn: 'রমজানের মূল কথা', items: null },
+  { id: 'benefits', en: 'Benefits of Ramadan', bn: 'রমজানের ফজিলত', items: [
+    R_ITEM('Whoever fasts Ramadan with faith and hoping for Allah\'s reward will have all his previous sins forgiven.', 'যে ব্যক্তি ঈমানের সাথে ও সওয়াবের আশায় রমজানের রোজা রাখে, তার আগের সব গুনাহ মাফ করে দেওয়া হয়।', 'Sahih al-Bukhari 38', 'bukhari:38'),
+    R_ITEM('Whoever stands in night prayer in Ramadan (Taraweeh) with faith and hoping for reward will have his previous sins forgiven.', 'যে ব্যক্তি ঈমানের সাথে ও সওয়াবের আশায় রমজানের রাতে নামাজে দাঁড়ায় (তারাবি), তার আগের গুনাহ মাফ করা হয়।', 'Sahih al-Bukhari 37', 'bukhari:37'),
+    R_ITEM('When Ramadan begins, the gates of Paradise are opened, the gates of Hell are closed and the devils are chained.', 'রমজান এলে জান্নাতের দরজাগুলো খুলে দেওয়া হয়, জাহান্নামের দরজাগুলো বন্ধ করা হয় এবং শয়তানদের শিকলবন্দি করা হয়।', 'Sahih al-Bukhari 1899', 'bukhari:1899'),
+    R_ITEM('Allah says: "Fasting is for Me and I will reward it." The fasting person has two joys: when he breaks his fast and when he meets his Lord. The smell of his mouth is better to Allah than musk.', 'আল্লাহ বলেন: "রোজা আমার জন্য, আমিই এর প্রতিদান দেব।" রোজাদারের দুটি আনন্দ — ইফতারের সময় এবং রবের সাথে সাক্ষাতের সময়। রোজাদারের মুখের গন্ধ আল্লাহর কাছে মিশকের চেয়েও উত্তম।', 'Sahih al-Bukhari 1904', 'bukhari:1904'),
+    R_ITEM('In Paradise there is a gate called Ar-Rayyan. Only those who fasted will enter through it.', 'জান্নাতে "রাইয়ান" নামে একটি দরজা আছে; শুধু রোজাদাররাই সেই দরজা দিয়ে প্রবেশ করবে।', 'Sahih al-Bukhari 1896', 'bukhari:1896'),
+    R_ITEM('Fasting was prescribed for you, as it was for those before you, so that you may gain taqwa (mindfulness of Allah).', 'তোমাদের উপর রোজা ফরজ করা হয়েছে, যেমন আগের লোকদের উপর করা হয়েছিল, যাতে তোমরা তাকওয়া অর্জন করতে পারো।', 'Quran 2:183 (meaning)', 'q:2:183'),
+    R_ITEM('The Prophet ﷺ was the most generous of people, and most of all in Ramadan, when Jibril met him every night to study the Quran.', 'নবী ﷺ ছিলেন সবচেয়ে দানশীল, বিশেষ করে রমজানে, যখন জিবরাইল (আ.) প্রতি রাতে তাঁর সাথে কুরআন পর্যালোচনা করতেন।', 'Sahih al-Bukhari 6', 'bukhari:6'),
+  ]},
+  { id: 'qadr', en: 'Laylatul Qadr', bn: 'লাইলাতুল কদর', items: [
+    R_ITEM('The Night of Decree is better than a thousand months (more than 83 years).', 'লাইলাতুল কদর হাজার মাসের চেয়েও উত্তম (৮৩ বছরেরও বেশি)।', 'Quran 97:3 (meaning)', 'q:97:3'),
+    R_ITEM('The Quran was sent down on this night, a blessed night.', 'এই বরকতময় রাতেই কুরআন নাজিল করা হয়েছে।', 'Quran 97:1 and 44:3 (meaning)', 'q:97:1'),
+    R_ITEM('On this night the angels and the Spirit (Jibril) come down by Allah\'s permission, and it is peace until the break of dawn.', 'এই রাতে আল্লাহর অনুমতিতে ফেরেশতারা ও রূহ (জিবরাইল) নেমে আসেন; ফজর পর্যন্ত শান্তি বিরাজ করে।', 'Quran 97:4–5 (meaning)', 'q:97:4'),
+    R_ITEM('Whoever stands in prayer on Laylatul Qadr with faith and hoping for reward will have his previous sins forgiven.', 'যে ব্যক্তি ঈমানের সাথে ও সওয়াবের আশায় লাইলাতুল কদরে নামাজে দাঁড়ায়, তার আগের গুনাহ মাফ করা হয়।', 'Sahih al-Bukhari 1901', 'bukhari:1901'),
+    R_ITEM('Look for it in the odd nights of the last ten nights of Ramadan: the 21st, 23rd, 25th, 27th and 29th.', 'রমজানের শেষ দশ রাতের বেজোড় রাতগুলোতে খুঁজুন: ২১, ২৩, ২৫, ২৭ ও ২৯তম রাত।', 'Sahih al-Bukhari 2017', 'bukhari:2017'),
+    R_ITEM('In the last ten nights the Prophet ﷺ stayed up at night, woke his family and worked harder in worship.', 'শেষ দশ রাতে নবী ﷺ রাত জেগে ইবাদত করতেন, পরিবারকে জাগাতেন এবং আরও বেশি পরিশ্রম করতেন।', 'Sahih al-Bukhari 2024', 'bukhari:2024'),
+  ], dua: { ar: 'اللَّهُمَّ إِنَّكَ عَفُوٌّ تُحِبُّ الْعَفْوَ فَاعْفُ عَنِّي', tr: 'Allahumma innaka ‘afuwwun tuhibbul ‘afwa fa‘fu ‘anni', en: 'O Allah, You are Pardoning and You love to pardon, so pardon me.', bn: 'হে আল্লাহ, আপনি ক্ষমাশীল, ক্ষমা করতে ভালোবাসেন, অতএব আমাকে ক্ষমা করুন।', ref: 'Jami\' at-Tirmidhi 3513 (hasan sahih) — taught by the Prophet ﷺ to Aisha (RA) for Laylatul Qadr', link: 'tirmidhi:3513' } },
+  { id: 'revelation', en: 'How the Quran came', bn: 'কুরআন যেভাবে এসেছে', items: [
+    R_ITEM('The first revelation came in the Cave of Hira near Makkah. The angel Jibril came to the Prophet ﷺ and said: "Iqra — Read!" The first verses revealed were Surah Al-Alaq 96:1–5. This is where the name of this app comes from.', 'মক্কার কাছে হেরা গুহায় প্রথম ওহি আসে। ফেরেশতা জিবরাইল (আ.) নবী ﷺ-এর কাছে এসে বললেন: "ইকরা — পড়ুন!" প্রথম নাজিল হয় সূরা আলাক ৯৬:১–৫। এই অ্যাপের নাম "ইকরা" এখান থেকেই।', 'Sahih al-Bukhari 3', 'bukhari:3'),
+    R_ITEM('The revelation began in the month of Ramadan, on Laylatul Qadr.', 'রমজান মাসে, লাইলাতুল কদরে কুরআন নাজিল শুরু হয়।', 'Quran 2:185 and 97:1 (meaning)', 'q:2:185'),
+    R_ITEM('The trustworthy Spirit (Jibril) brought it down upon the heart of the Prophet ﷺ, in clear Arabic.', 'বিশ্বস্ত রূহ (জিবরাইল) এটি নবী ﷺ-এর হৃদয়ে নাজিল করেছেন, স্পষ্ট আরবি ভাষায়।', 'Quran 26:193–195 (meaning)', 'q:26:193'),
+    R_ITEM('It was revealed bit by bit over about 23 years, so it could be recited slowly to people and make the believers\' hearts firm.', 'প্রায় ২৩ বছর ধরে অল্প অল্প করে নাজিল হয়েছে, যাতে ধীরে ধীরে মানুষকে পড়ে শোনানো যায় এবং মুমিনদের হৃদয় দৃঢ় হয়।', 'Quran 17:106 and 25:32 (meaning)', 'q:17:106'),
+    R_ITEM('Every Ramadan, Jibril reviewed the Quran with the Prophet ﷺ. In the year he passed away, they reviewed it twice.', 'প্রতি রমজানে জিবরাইল (আ.) নবী ﷺ-এর সাথে কুরআন পর্যালোচনা করতেন। তাঁর ইন্তেকালের বছরে দুবার করেছেন।', 'Sahih al-Bukhari 4998', 'bukhari:4998'),
+    R_ITEM('After the Prophet ﷺ, Abu Bakr (RA) had the Quran collected into one book, and later Uthman (RA) had copies made and sent to the main cities.', 'নবী ﷺ-এর পরে আবু বকর (রা.) কুরআনকে এক গ্রন্থে সংকলন করান, পরে উসমান (রা.) এর কপি তৈরি করে প্রধান শহরগুলোতে পাঠান।', 'Sahih al-Bukhari 4986, 4987', 'bukhari:4986'),
+    R_ITEM('Allah promised to protect it: "Indeed, We sent down the Reminder, and indeed We will guard it."', 'আল্লাহ এর হেফাজতের প্রতিশ্রুতি দিয়েছেন: "নিশ্চয়ই আমি এই উপদেশ (কুরআন) নাজিল করেছি এবং আমিই এর সংরক্ষক।"', 'Quran 15:9 (meaning)', 'q:15:9'),
+  ]},
+  { id: 'reading', en: 'Reading the Quran', bn: 'কুরআন পড়ার ফজিলত', items: [
+    R_ITEM('Every letter you read from the Book of Allah earns a good deed, and each good deed is multiplied ten times. "Alif Lam Mim" is not one letter: Alif is a letter, Lam is a letter and Mim is a letter.', 'আল্লাহর কিতাবের প্রতিটি অক্ষর পড়লে একটি নেকি, আর প্রতিটি নেকি দশ গুণ। "আলিফ-লাম-মীম" একটি অক্ষর নয়; আলিফ একটি, লাম একটি, মীম একটি অক্ষর।', 'Jami\' at-Tirmidhi 2910', 'tirmidhi:2910'),
+    R_ITEM('The one who reads the Quran fluently is with the noble, righteous angels. The one who struggles and finds it hard, but keeps reading, gets a double reward. A great encouragement for anyone who finds reading difficult.', 'যে সাবলীলভাবে কুরআন পড়ে, সে সম্মানিত ফেরেশতাদের সাথে থাকবে। আর যে কষ্ট করে আটকে আটকে পড়ে, সে দ্বিগুণ সওয়াব পাবে। যাদের পড়তে কষ্ট হয়, তাদের জন্য এটি বড় সুসংবাদ — তাই পড়া চালিয়ে যান।', 'Sahih al-Bukhari 4937; Sahih Muslim 798', 'bukhari:4937'),
+    R_ITEM('The best of you are those who learn the Quran and teach it.', 'তোমাদের মধ্যে সর্বোত্তম সে, যে কুরআন শেখে এবং অন্যকে শেখায়।', 'Sahih al-Bukhari 5027', 'bukhari:5027'),
+    R_ITEM('Read the Quran, for on the Day of Resurrection it will come as an intercessor for those who read it.', 'কুরআন পড়ো, কারণ কিয়ামতের দিন এটি তার পাঠকারীদের জন্য সুপারিশকারী হয়ে আসবে।', 'Sahih Muslim 804', 'muslim:804'),
+    R_ITEM('When people gather to read the Book of Allah and study it together, tranquillity comes down on them, mercy covers them, the angels surround them and Allah mentions them to those with Him.', 'যখন লোকেরা একত্র হয়ে আল্লাহর কিতাব পড়ে ও আলোচনা করে, তাদের উপর প্রশান্তি নেমে আসে, রহমত তাদের ঢেকে নেয়, ফেরেশতারা তাদের ঘিরে রাখেন এবং আল্লাহ তাঁর কাছের ফেরেশতাদের কাছে তাদের কথা উল্লেখ করেন।', 'Sahih Muslim 2699', 'muslim:2699'),
+    R_ITEM('A believer who reads the Quran is like a citron fruit: its smell is pleasant and its taste is good.', 'যে মুমিন কুরআন পড়ে, সে কমলালেবুর (উতরুজ্জা) মতো — যার ঘ্রাণ সুন্দর এবং স্বাদও ভালো।', 'Sahih al-Bukhari 5020', 'bukhari:5020'),
+  ]},
+  { id: 'zakat', en: 'Zakat & calculator', bn: 'যাকাত ও হিসাব', calc: true, items: [
+    R_ITEM('Zakat is one of the five pillars of Islam: the testimony of faith, prayer, zakat, Hajj and fasting in Ramadan.', 'যাকাত ইসলামের পাঁচটি স্তম্ভের একটি: কালিমা, নামাজ, যাকাত, হজ ও রমজানের রোজা।', 'Sahih al-Bukhari 8', 'bukhari:8'),
+    R_ITEM('Allah tells the Prophet ﷺ: take charity from their wealth to purify them and help them grow in goodness.', 'আল্লাহ নবী ﷺ-কে বলেন: তাদের সম্পদ থেকে সদকা গ্রহণ করুন, যা দিয়ে তাদের পবিত্র ও পরিশুদ্ধ করবেন।', 'Quran 9:103 (meaning)', 'q:9:103'),
+    R_ITEM('Establish the prayer and give zakat — the Quran mentions them together again and again.', 'নামাজ কায়েম করো এবং যাকাত দাও — কুরআনে এই দুটি বারবার একসাথে এসেছে।', 'Quran 2:43 (meaning)', 'q:2:43'),
+    R_ITEM('Charity never decreases wealth.', 'সদকা কখনো সম্পদ কমায় না।', 'Sahih Muslim 2588', 'muslim:2588'),
+    R_ITEM('Spending in Allah\'s way is like a grain that grows seven ears, with a hundred grains in each ear. Allah multiplies it for whom He wills.', 'আল্লাহর পথে ব্যয় একটি বীজের মতো, যা থেকে সাতটি শীষ জন্মায়, প্রতিটি শীষে একশো দানা। আল্লাহ যাকে চান বহুগুণ বাড়িয়ে দেন।', 'Quran 2:261 (meaning)', 'q:2:261'),
+    R_ITEM('Zakat is for eight groups: the poor, the needy, those who collect it, those whose hearts are being drawn to Islam, freeing captives, people in debt, the cause of Allah, and stranded travellers.', 'যাকাত আট শ্রেণির জন্য: ফকির, মিসকিন, যাকাত আদায়কারী, যাদের মন ইসলামের দিকে আকৃষ্ট করা হচ্ছে, দাসমুক্তি, ঋণগ্রস্ত, আল্লাহর পথে এবং বিপদগ্রস্ত মুসাফির।', 'Quran 9:60 (meaning)', 'q:9:60'),
+    R_ITEM('Zakat al-Fitr (fitrana) is due for every Muslim, young or old, and should be given before the Eid prayer.', 'যাকাতুল ফিতর (ফিতরা) ছোট-বড় প্রত্যেক মুসলমানের পক্ষ থেকে দিতে হয় এবং ঈদের নামাজের আগে আদায় করতে হয়।', 'Sahih al-Bukhari 1503', 'bukhari:1503'),
+  ]},
+];
+function zakatCalcHTML() {
+  const z = store.get('zakat', {});
+  const v = k => z[k] != null ? z[k] : '';
+  const num = (k, label, bn) => `<label class="f">${label} · <span class="bn">${bn}</span></label><input type="number" inputmode="decimal" min="0" step="any" data-z="${k}" value="${v(k)}" placeholder="0">`;
+  return `<div class="card zcalc" id="zcalc">
+    <h3 style="margin-top:0">🧮 Zakat calculator · <span class="bn">যাকাত ক্যালকুলেটর</span></h3>
+    <p class="note" style="margin-top:0">Add up what you have owned for one lunar (Islamic) year. Zakat is 2.5% of it if the total is above the <b>nisab</b>.<br><span class="bn">এক চন্দ্র বছর ধরে থাকা সম্পদের মোট হিসাব করুন। মোট নিসাবের বেশি হলে ২.৫% যাকাত দিতে হয়।</span></p>
+    <label class="f">Currency · <span class="bn">মুদ্রা</span></label>
+    <select data-z="cur">${['£', '$', '€', '৳', '₹', '﷼', 'RM', 'Rp'].map(c => `<option ${(z.cur || '£') === c ? 'selected' : ''}>${c}</option>`).join('')}</select>
+    <label class="f">Nisab based on · <span class="bn">নিসাবের ভিত্তি</span></label>
+    <div class="seg" id="zbasis"><button data-v="silver" class="${(z.basis || 'silver') === 'silver' ? 'on' : ''}">Silver 612.36 g</button><button data-v="gold" class="${z.basis === 'gold' ? 'on' : ''}">Gold 87.48 g</button></div>
+    <p class="note">Most UK zakat charities use the silver nisab because it is lower, so more help reaches people in need. Follow your scholar if they advise differently.</p>
+    ${num('price', `Today's ${z.basis === 'gold' ? 'gold' : 'silver'} price per gram`, 'আজকের প্রতি গ্রামের দাম')}
+    <p class="note">Check today's price at <a href="https://nzf.org.uk/nisab" target="_blank" rel="noopener">nzf.org.uk/nisab</a> or a jeweller.</p>
+    <h3>Your wealth · <span class="bn">আপনার সম্পদ</span></h3>
+    ${num('cash', 'Cash at home and in bank accounts', 'নগদ ও ব্যাংকে জমা')}
+    ${num('gold', 'Value of gold you own', 'সোনার মূল্য')}
+    ${num('silver', 'Value of silver you own', 'রুপার মূল্য')}
+    ${num('invest', 'Shares, investments, savings schemes', 'শেয়ার ও বিনিয়োগ')}
+    ${num('business', 'Business stock and goods for sale', 'ব্যবসার পণ্য')}
+    ${num('owed', 'Money owed to you that you expect back', 'পাওনা টাকা (যা ফেরত পাবেন)')}
+    <h3>Take away · <span class="bn">বাদ দিন</span></h3>
+    ${num('debts', 'Debts and bills due now', 'এখন পরিশোধযোগ্য ঋণ ও বিল')}
+    <div class="zresult" id="zres"></div>
+    <h3>Zakat al-Fitr (fitrana) · <span class="bn">ফিতরা</span></h3>
+    ${num('people', 'Number of people in your family', 'পরিবারের সদস্য সংখ্যা')}
+    ${num('fitr', 'Amount per person (set by your local mosque)', 'জনপ্রতি পরিমাণ (স্থানীয় মসজিদ অনুযায়ী)')}
+    <div class="zresult" id="zfitr"></div>
+    <p class="note">This calculator is a guide. For gold jewellery, pensions, property or business questions, please ask a scholar or your local mosque.</p>
+  </div>`;
+}
+function wireZakat() {
+  const box = $('#zcalc'); if (!box) return;
+  const z = store.get('zakat', {});
+  const n = k => { const x = parseFloat(z[k]); return isFinite(x) && x > 0 ? x : 0; };
+  const money = x => (z.cur || '£') + ' ' + x.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const calc = () => {
+    const grams = (z.basis || 'silver') === 'gold' ? 87.48 : 612.36;
+    const nisab = n('price') * grams;
+    const total = n('cash') + n('gold') + n('silver') + n('invest') + n('business') + n('owed') - n('debts');
+    let r = `<div>Total zakatable wealth · <span class="bn">মোট</span>: <b>${money(Math.max(0, total))}</b></div>`;
+    if (!n('price')) r += `<div class="note">Enter today's ${(z.basis || 'silver')} price per gram to check the nisab.</div>`;
+    else {
+      r += `<div>Nisab · <span class="bn">নিসাব</span>: <b>${money(nisab)}</b></div>`;
+      if (total >= nisab && total > 0) r += `<div class="zdue">Zakat due · <span class="bn">যাকাত</span>: ${money(total * 0.025)}</div>`;
+      else r += `<div class="zdue zno">Below nisab — no zakat due · <span class="bn">নিসাবের কম — যাকাত ফরজ নয়</span></div>`;
+    }
+    $('#zres').innerHTML = r;
+    $('#zfitr').innerHTML = n('people') && n('fitr') ? `<div class="zdue">Fitrana total · <span class="bn">মোট ফিতরা</span>: ${money(n('people') * n('fitr'))}</div>` : '';
+  };
+  box.querySelectorAll('[data-z]').forEach(el => el.oninput = el.onchange = () => { z[el.dataset.z] = el.value; store.set('zakat', z); calc(); });
+  box.querySelectorAll('#zbasis button').forEach(b => b.onclick = () => { z.basis = b.dataset.v; z.price = ''; store.set('zakat', z); $('#rcatbox').innerHTML = ramadanCatHTML('zakat'); wireRamadanCats(); });
+  calc();
+}
+function rItemHTML(it) {
+  let link = '';
+  if (it.link.startsWith('q:')) { const [, s, a] = it.link.split(':'); link = `<button class="sharebtn" data-openq="${s}:${a}" style="float:none">📖 Read ${s}:${a} in Iqra</button>`; }
+  else link = `<a href="https://sunnah.com/${it.link}" target="_blank" rel="noopener">${esc(it.ref)}</a>`;
+  return `<div class="card ritem"><p>${esc(it.en)}</p><p class="bn">${esc(it.bn)}</p><p class="bref">📚 ${it.link.startsWith('q:') ? esc(it.ref) + ' &nbsp;' + link : link}</p></div>`;
+}
+function ramadanCatHTML(id) {
+  const cat = RAMADAN_CATS.find(c => c.id === id) || RAMADAN_CATS[0];
+  let h = `<div class="chips" id="rcats">${RAMADAN_CATS.map(c => `<button class="chip ${c.id === cat.id ? 'on' : ''}" data-rcat="${c.id}">${esc(c.en)}<br><span class="bn">${esc(c.bn)}</span></button>`).join('')}</div>`;
+  if (!cat.items) h += RAMADAN_INFO.map(([en, bn, ten, tbn], i) => `<details class="info"${i === 0 ? ' open' : ''}><summary><span>${esc(en)} · <span class="bn">${esc(bn)}</span></span></summary><p>${esc(ten)}</p><p class="bn">${esc(tbn)}</p></details>`).join('');
+  else {
+    if (cat.calc) h += zakatCalcHTML() + `<h3>Benefits of zakat · <span class="bn">যাকাতের ফজিলত</span></h3>`;
+    h += cat.items.map(rItemHTML).join('');
+    if (cat.dua) { const d = cat.dua; h += `<div class="card benefitdua"><h3 style="margin-top:0">🤲 Dua for Laylatul Qadr · <span class="bn">লাইলাতুল কদরের দোয়া</span></h3><div class="ar" lang="ar" dir="rtl" style="font-family:var(--ar-font);font-size:1.6em;line-height:2;text-align:center">${d.ar}</div><p style="text-align:center"><i>${esc(d.tr)}</i></p><p>${esc(d.en)}</p><p class="bn">${esc(d.bn)}</p><p class="bref">📚 <a href="https://sunnah.com/${d.link}" target="_blank" rel="noopener">${esc(d.ref)}</a></p></div>`; }
+  }
+  return h;
+}
+
+function wireRamadanCats() {
+  $('#rcatbox').querySelectorAll('[data-rcat]').forEach(b => b.onclick = () => { store.set('rcat', b.dataset.rcat); $('#rcatbox').innerHTML = ramadanCatHTML(b.dataset.rcat); wireRamadanCats(); });
+  $('#rcatbox').querySelectorAll('[data-openq]').forEach(b => b.onclick = () => { const [s2, a2] = b.dataset.openq.split(':').map(Number); go('reader', { surah: s2, s: s2, a: a2 }); });
+  wireZakat();
+}
 function renderRamadan() {
   setTop({ title: 'Ramadan · <span class="bn">রমজান</span>', sub: 'সেহরি ও ইফতারের সময় · রমজান সম্পর্কে জানুন' });
   const place = currentPlace(), o = opts(place), tz = place.tz;
@@ -1326,8 +1466,7 @@ function renderRamadan() {
   } else {
     h += `<div class="card note">Ramadan dates are not available on this device, but everything below still works.</div>`;
   }
-  h += `<h2>Learn about Ramadan · <span class="bn">রমজান সম্পর্কে জানুন</span></h2>` +
-    RAMADAN_INFO.map(([en, bn, ten, tbn], i) => `<details class="info"${i === 0 ? ' open' : ''}><summary><span>${esc(en)} · <span class="bn">${esc(bn)}</span></span></summary><p>${esc(ten)}</p><p class="bn">${esc(tbn)}</p></details>`).join('');
+  h += `<h2 id="learn">Learn · <span class="bn">জানুন</span></h2><div id="rcatbox">${ramadanCatHTML(store.get('rcat', 'basics'))}</div>`;
   h += `<h2>Read more · <span class="bn">আরও পড়ুন</span></h2>
     <div class="linkbtns">
       <button class="btn ghost" data-go="q" data-j="2" data-s="2" data-a="183">📖 Quran 2:183–187 — the verses about fasting · <span class="bn">রোজার আয়াত</span></button>
@@ -1339,6 +1478,8 @@ function renderRamadan() {
   $('#view').innerHTML = h;
   if (R) { $('#view').querySelector('.linkbtns').insertAdjacentHTML('beforebegin', remindersCard('ramadan')); wireReminders(place, o); }
   if ($('#rchg')) $('#rchg').onclick = () => { openPlacePicker(); };
+  { const anchor = $('#view').querySelector('.rhero + .note, .rhero ~ .twin + .note') || $('#view').querySelector('.note'); if (anchor) anchor.after($('#learn'), $('#rcatbox')); }
+  wireRamadanCats();
   $('#view').querySelectorAll('[data-go]').forEach(b => b.onclick = () => b.dataset.go === 'q' ? go('reader', { juz: +b.dataset.j, s: +b.dataset.s, a: +b.dataset.a }) : go('book', { n: +b.dataset.n }));
 }
 
