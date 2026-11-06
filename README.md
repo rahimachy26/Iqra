@@ -1,6 +1,6 @@
 <p align="center"><img src="brand/Iqra-logo.png" alt="Iqra logo" width="520"></p>
 
-# Iqra · ইকরা
+# Iqra – কুরআন ও সুন্নাহ
 
 *Iqra (اقرأ) means "Read" — the first word revealed in the Quran.*
 
