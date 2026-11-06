@@ -183,6 +183,7 @@ textarea{width:100%;border:2px solid var(--line);border-radius:14px;background:v
 .mhday small{font-size:.75em}
 .mhday:disabled{opacity:.35}
 .mhday.l1{background:#DCEFE7}.mhday.l2{background:#8CC7AE}.mhday.l3{background:#1F6F5C;color:#fff;border-color:#1F6F5C}
+.mhday.oddn{border-color:#C98A1B}
 .mhday.cur{outline:3px solid var(--accent);outline-offset:2px}
 .mhstats{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .mhstats div{background:var(--accent-soft);border-radius:14px;padding:12px;text-align:center}
@@ -697,6 +698,7 @@ function go(view, arg) {
   if (view === 'book') { selectTab('hadith'); renderBook(arg); }
   if (view === 'ramadan') { selectTab('ramadan'); renderRamadan(); }
   if (view === 'tracker') renderTracker(arg || {});
+  if (view === 'rtracker') renderRTracker(arg || {});
   const hash = view === 'reader' ? (arg.surah ? 'surah-' + arg.surah : 'para-' + arg.juz) : view === 'book' ? 'bukhari-' + arg.n : view;
   try { history.replaceState(null, '', '#' + hash); } catch (e) {}
 }
@@ -1350,6 +1352,131 @@ function renderTracker(arg = {}) {
   reset.onclick = () => { if (!armed) { armed = true; reset.innerHTML = 'Tap again to confirm — this clears your 30 days · <span class="bn">আবার চাপুন</span>'; setTimeout(() => { armed = false; }, 4000); return; } mhSave({ start: today, days: {} }); renderTracker(); };
 }
 
+/* ---------- Ramadan 30-day check (রমজানের ৩০ দিন) — saved only on this device ---------- */
+const utcKey = d => `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}-${String(d.getUTCDate()).padStart(2, '0')}`;
+const RM_CHECKS = [
+  ['sehri', '🌙', 'Ate sehri (sunnah)', 'সেহরি খেয়েছি (সুন্নাহ)'],
+  ['taraweeh', '🕌', 'Prayed Taraweeh', 'তারাবি পড়েছি'],
+  ['quran', '📖', 'Read Quran', 'কুরআন পড়েছি'],
+  ['iftardua', '🤲', 'Made dua before iftar', 'ইফতারের আগে দোয়া করেছি'],
+  ['charity', '🍲', 'Gave charity / fed someone iftar', 'দান করেছি / কাউকে ইফতার করিয়েছি'],
+  ['tongue', '🤐', 'Guarded my tongue (no backbiting, lying, arguing)', 'জিহ্বা সংযত রেখেছি (গিবত, মিথ্যা, ঝগড়া নয়)'],
+];
+const RM_LAST10 = [
+  ['qiyam', '🌌', 'Night prayer (qiyam / tahajjud)', 'রাতের নামাজ (কিয়াম / তাহাজ্জুদ)'],
+  ['qadrdua', '✨', 'Said the Laylatul Qadr dua', 'লাইলাতুল কদরের দোয়া পড়েছি'],
+];
+function rmScore(e, day) {
+  if (!e) return 0;
+  let s = 0, max = 4 + 10 + 2 + 1 + 2 + 1 + 2 + 1 + 2;
+  if (e.fast === 'kept' || e.fast === 'excused') s += 4;
+  for (const [k] of MH_PRAYERS) s += e.p && e.p[k] === 'on' ? 2 : e.p && e.p[k] === 'late' ? 1 : 0;
+  for (const [k] of RM_CHECKS) if (e[k]) s += ['taraweeh', 'quran', 'charity'].includes(k) ? 2 : 1;
+  if (e.deed && e.deed.trim()) s += 2;
+  if (day >= 21) { max += 3; if (e.qiyam) s += 2; if (e.qadrdua) s += 1; }
+  return Math.round(s / max * 100);
+}
+function renderRTracker(arg = {}) {
+  setTop({ title: 'Ramadan check · <span class="bn">রমজানের ৩০ দিন</span>', sub: 'রোজা, তারাবি, কুরআন, শেষ দশ রাত ও দান', back: true });
+  selectTab('ramadan');
+  const place = currentPlace(), o = opts(place), tz = place.tz;
+  const R = ramadanPeriod(PT.localYMD(tz));
+  const motive = `<div class="card ritem benefitdua"><p>Whoever fasts Ramadan with faith and hoping for Allah's reward will have all his previous sins forgiven.</p><p class="bn">যে ব্যক্তি ঈমানের সাথে ও সওয়াবের আশায় রমজানের রোজা রাখে, তার আগের সব গুনাহ মাফ করে দেওয়া হয়।</p><p class="bref">📚 <a href="https://sunnah.com/bukhari:38" target="_blank" rel="noopener">Sahih al-Bukhari 38</a></p></div>`;
+  if (!R) { $('#view').innerHTML = `<div class="card note">Ramadan dates are not available on this device.</div>`; return; }
+  const key = 'rmh-' + R.year;
+  const rm = store.get(key, { shift: 0, days: {} });
+  const startKey = ymdAdd(utcKey(R.days[0].date), rm.shift || 0);
+  const len = R.days.length;
+  const today = ymdLocal();
+  const todayNo = ymdDiff(startKey, today) + 1;
+  const started = todayNo >= 1;
+  const shiftSeg = `<label class="f">Ramadan start in your country (moon sighting) · <span class="bn">আপনার দেশে রমজান শুরুর দিন (চাঁদ দেখা অনুযায়ী)</span></label>
+    <div class="seg" id="rmShift">${[[-1, 'A day earlier', 'এক দিন আগে'], [0, 'As shown', 'যেমন দেখানো'], [1, 'A day later', 'এক দিন পরে']].map(([v, l, b]) => `<button data-v="${v}" class="${(rm.shift || 0) === v ? 'on' : ''}">${l}<br><span class="bn">${b}</span></button>`).join('')}</div>`;
+  const wireShift = () => $('#rmShift').querySelectorAll('button').forEach(b => b.onclick = () => { rm.shift = +b.dataset.v; store.set(key, rm); renderRTracker(); });
+  const niceKey = k => { const [y, m, d] = k.split('-').map(Number); return new Date(y, m - 1, d).toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }); };
+  if (!started) {
+    const left = 1 - todayNo;
+    $('#view').innerHTML = `<div class="card rhero"><div>Ramadan ${R.year} AH · <span class="bn">রমজান</span></div><div class="big">Starts in ${left} day${left === 1 ? '' : 's'} · <span class="bn">আর ${bnNum(left)} দিন</span></div><div>First fast: ${esc(niceKey(startKey))}</div></div>
+      <div class="card"><p style="margin-top:0">Your Ramadan checklist opens on the first day of Ramadan. Each day you can tick off your fast, prayers, Taraweeh, Quran, iftar dua, charity, and in the last ten nights, night prayer and the Laylatul Qadr dua.</p><p class="bn">রমজানের প্রথম দিনে এই চেকলিস্ট খুলবে। প্রতিদিন রোজা, নামাজ, তারাবি, কুরআন, ইফতারের দোয়া, দান — আর শেষ দশ রাতে কিয়াম ও লাইলাতুল কদরের দোয়া টিক দিতে পারবেন।</p>${shiftSeg}</div>
+      ${motive}
+      <div class="linkbtns"><button class="btn" id="rmRem">🔔 Remind me every Ramadan night at 10:30 pm · <span class="bn">রমজানের প্রতি রাতে মনে করিয়ে দিন</span></button>
+      <button class="btn ghost" data-go-tracker>📝 Use the 30-day Daily check now · <span class="bn">এখনই দৈনিক আত্মসমালোচনা</span></button></div>`;
+    wireShift(); wireRmRem(startKey, len);
+    $('#view').querySelector('[data-go-tracker]').onclick = () => go('tracker');
+    return;
+  }
+  const finished = todayNo > len;
+  let day = arg.day || Math.min(todayNo, len);
+  day = Math.max(1, Math.min(day, Math.min(todayNo, len)));
+  const dateKey = ymdAdd(startKey, day - 1);
+  const e = rm.days[day] || (rm.days[day] = { p: {} });
+  const pt = (() => { const [y, m, d] = dateKey.split('-').map(Number); return PT.forDate(y, m, d, place, o); })();
+  const last10 = day >= 21, odd = last10 && day % 2 === 1;
+  // stats
+  let kept = 0, owed = 0, tar = 0, paras = 0, charity = 0, onTime = 0, prayed = 0, fitr = false;
+  for (let i = 1; i <= len; i++) { const x = rm.days[i]; if (!x) continue; if (x.fast === 'kept') kept++; if (x.fast === 'excused' || x.fast === 'missed') owed++; if (x.taraweeh) tar++; paras += +x.paras || 0; if (x.charity) charity++; if (x.fitr) fitr = true; MH_PRAYERS.forEach(([p]) => { if (x.p && x.p[p] === 'on') onTime++; if (x.p && (x.p[p] === 'on' || x.p[p] === 'late')) prayed++; }); }
+  const chk = ([k, ic, en, bn]) => `<button class="mhcheck ${e[k] ? 'on' : ''}" data-ck="${k}"><span class="mhbox">${e[k] ? '✓' : ''}</span><span>${ic} ${en}<br><span class="bn">${bn}</span></span></button>`;
+  let h = `<div class="card rhero"><div>Ramadan ${R.year} AH · <span class="bn">রমজান</span></div><div class="big">${finished ? 'Ramadan complete — Eid Mubarak! · <span class="bn">ঈদ মোবারক!</span>' : `Day ${todayNo} of ${len} · <span class="bn">${bnNum(todayNo)}তম রোজা</span>`}</div>
+      <div>Sehri ends ${fmt(pt.fajr, tz)} · Iftar ${fmt(pt.maghrib, tz)} · ${esc(place.city)}</div></div>
+    <div class="mhnav"><button class="iconbtn" id="mhPrev" ${day <= 1 ? 'disabled' : ''}>‹</button><div><b>Ramadan ${day}${odd ? ' 🌙' : ''}</b><br><span class="muted">${esc(niceKey(dateKey))}</span></div><button class="iconbtn" id="mhNext" ${day >= Math.min(todayNo, len) ? 'disabled' : ''}>›</button></div>
+    ${last10 ? `<div class="card benefitdua" style="text-align:center"><b>${odd ? '🌙 Odd night — seek Laylatul Qadr tonight! · বেজোড় রাত — আজ লাইলাতুল কদর তালাশ করুন!' : '✨ The last ten nights · শেষ দশ রাত'}</b><div class="ar" lang="ar" dir="rtl" style="font-family:var(--ar-font);font-size:1.4em;line-height:2">اللَّهُمَّ إِنَّكَ عَفُوٌّ تُحِبُّ الْعَفْوَ فَاعْفُ عَنِّي</div><div class="muted">Allahumma innaka ‘afuwwun tuhibbul ‘afwa fa‘fu ‘anni · Tirmidhi 3513</div></div>` : ''}
+    <div class="card"><h3 style="margin-top:0">🌙 Today's fast · <span class="bn">আজকের রোজা</span></h3>
+      <div class="seg mhseg" id="rmFast">${[['kept', '✓ Fasted', 'রোজা রেখেছি'], ['excused', '⏸ Excused', 'অব্যাহতি'], ['missed', '✗ Missed', 'রাখিনি']].map(([v, l, b]) => `<button data-v="${v}" class="${e.fast === v ? 'on ' + (v === 'kept' ? 'on' : v === 'excused' ? 'late' : 'miss') : ''}">${l}<br><span class="bn">${b}</span></button>`).join('')}</div>
+      <p class="note">"Excused" is for travel, illness, pregnancy, breastfeeding or a period. These days are counted below so you can make them up later. · <span class="bn">ভ্রমণ, অসুস্থতা, গর্ভাবস্থা, দুগ্ধদান বা মাসিকের জন্য। এই দিনগুলো পরে কাযা করার জন্য গোনা হবে।</span></p></div>
+    <div class="card"><h3 style="margin-top:0">🕌 Prayers · <span class="bn">নামাজ</span></h3>
+    ${MH_PRAYERS.map(([k, en, bn]) => `<div class="mhp"><div class="mhpn"><b>${en}</b> · <span class="bn">${bn}</span><small class="muted"> ${fmt(pt[k], tz)}</small></div>
+      <div class="seg mhseg" data-pr="${k}">${[['on', '✓ On time', 'সময়মতো'], ['late', '⏱ Late', 'দেরিতে'], ['miss', '✗ Missed', 'পড়িনি']].map(([v, l, b]) => `<button data-v="${v}" class="${e.p[k] === v ? 'on ' + v : ''}">${l}<br><span class="bn">${b}</span></button>`).join('')}</div></div>`).join('')}</div>
+    <div class="card"><h3 style="margin-top:0">✅ Today I… · <span class="bn">আজ আমি…</span></h3>
+      ${RM_CHECKS.map(chk).join('')}
+      <label class="f">Paras of Quran read today (khatm goal) · <span class="bn">আজ কত পারা পড়েছি (খতমের লক্ষ্য)</span></label>
+      <div class="stepper"><button class="iconbtn" data-pstep="-0.5">−</button><input type="number" inputmode="decimal" step="0.5" min="0" id="rmParas" value="${e.paras || ''}" placeholder="0"><button class="iconbtn" data-pstep="0.5">+</button></div>
+      ${last10 ? `<h3>✨ Last ten nights · <span class="bn">শেষ দশ রাত</span></h3>${RM_LAST10.map(chk).join('')}` : ''}
+      ${day >= 25 ? `<h3>🎁 Before Eid · <span class="bn">ঈদের আগে</span></h3>${chk(['fitr', '💷', 'Zakat al-Fitr (fitrana) paid', 'ফিতরা আদায় করেছি'])}` : ''}
+    </div>
+    <div class="card"><h3 style="margin-top:0">🌱 One good deed today · <span class="bn">আজকের একটি ভালো কাজ</span></h3>
+      <textarea id="mhDeed" rows="2" placeholder="e.g. took iftar to a neighbour">${esc(e.deed || '')}</textarea>
+      <h3>🤲 My dua today · <span class="bn">আজ যা দোয়া করেছি</span></h3>
+      <textarea id="rmDua" rows="2" placeholder="Something I asked Allah for today">${esc(e.dua || '')}</textarea></div>
+    <div class="card"><div class="mhscore"><span>Today's score · <span class="bn">আজকের স্কোর</span></span><b id="mhPc">${rmScore(e, day)}%</b></div><div class="progress"><div id="mhBar" style="width:${rmScore(e, day)}%"></div></div></div>
+    <h2>My Ramadan · <span class="bn">আমার রমজান</span></h2>
+    <div class="mhgrid">${[...Array(len)].map((_, i) => { const n = i + 1; const lv = mhLevel(rmScore(rm.days[n], n)); return `<button class="mhday l${lv} ${n === day ? 'cur' : ''} ${n >= 21 && n % 2 ? 'oddn' : ''}" data-rday="${n}" ${n > todayNo ? 'disabled' : ''}>${n}${n >= 21 && n % 2 ? '<small>🌙</small>' : lv === 3 ? '<small>★</small>' : ''}</button>`; }).join('')}</div>
+    <p class="note">🌙 = odd nights of the last ten. Darker colour = better day.</p>
+    <div class="card"><h3 style="margin-top:0">📊 So far · <span class="bn">এ পর্যন্ত</span></h3>
+      <div class="mhstats"><div><b>${kept}</b><span>fasts kept<br><span class="bn">রোজা রেখেছি</span></span></div><div><b>${owed}</b><span>fasts to make up<br><span class="bn">কাযা বাকি</span></span></div><div><b>${tar}</b><span>Taraweeh nights<br><span class="bn">তারাবির রাত</span></span></div><div><b>${charity}</b><span>days of charity<br><span class="bn">দানের দিন</span></span></div><div><b>${prayed ? Math.round(onTime / prayed * 100) : 0}%</b><span>prayers on time<br><span class="bn">সময়মতো নামাজ</span></span></div><div><b>${fitr ? '✓' : '—'}</b><span>fitrana paid<br><span class="bn">ফিতরা</span></span></div></div>
+      <label class="f">Quran khatm · <span class="bn">কুরআন খতম</span>: ${Math.min(30, paras)} / 30 paras</label><div class="progress"><div style="width:${Math.min(100, paras / 30 * 100)}%"></div></div></div>
+    ${motive}
+    <div class="card">${shiftSeg}</div>
+    <div class="linkbtns">
+      <button class="btn" id="rmRem">🔔 Remind me every Ramadan night at 10:30 pm · <span class="bn">প্রতি রাতে মনে করিয়ে দিন</span></button>
+      <button class="btn ghost" id="mhShare">${SHARE_ICON.replace('<svg', '<svg width="20" height="20" style="vertical-align:-4px"')} Share my Ramadan progress · <span class="bn">অগ্রগতি শেয়ার করুন</span></button>
+    </div>
+    <p class="note">Private: saved only on this phone. · <span class="bn">শুধু এই ফোনে সংরক্ষিত।</span></p>`;
+  $('#view').innerHTML = h;
+  const save = () => { rm.days[day] = e; store.set(key, rm); const pc = rmScore(e, day); $('#mhPc').textContent = pc + '%'; $('#mhBar').style.width = pc + '%'; };
+  $('#rmFast').querySelectorAll('button').forEach(b => b.onclick = () => { e.fast = e.fast === b.dataset.v ? undefined : b.dataset.v; save(); renderRTracker({ day }); });
+  $('#view').querySelectorAll('[data-pr]').forEach(g => g.querySelectorAll('button').forEach(b => b.onclick = () => { const k = g.dataset.pr; e.p[k] = e.p[k] === b.dataset.v ? undefined : b.dataset.v; g.querySelectorAll('button').forEach(x => x.className = e.p[k] === x.dataset.v ? 'on ' + x.dataset.v : ''); save(); }));
+  $('#view').querySelectorAll('[data-ck]').forEach(b => b.onclick = () => { const k = b.dataset.ck; e[k] = !e[k]; b.classList.toggle('on', e[k]); b.querySelector('.mhbox').textContent = e[k] ? '✓' : ''; save(); });
+  const pin = $('#rmParas');
+  pin.oninput = () => { e.paras = Math.max(0, parseFloat(pin.value) || 0); save(); };
+  $('#view').querySelectorAll('[data-pstep]').forEach(b => b.onclick = () => { e.paras = Math.max(0, (+e.paras || 0) + +b.dataset.pstep); pin.value = e.paras; save(); });
+  [['mhDeed', 'deed'], ['rmDua', 'dua']].forEach(([id, k]) => { $('#' + id).oninput = ev => { e[k] = ev.target.value; save(); }; });
+  $('#mhPrev').onclick = () => renderRTracker({ day: day - 1 });
+  $('#mhNext').onclick = () => renderRTracker({ day: day + 1 });
+  $('#view').querySelectorAll('[data-rday]').forEach(b => b.onclick = () => { if (!b.disabled) renderRTracker({ day: +b.dataset.rday }); });
+  wireShift(); wireRmRem(startKey, len);
+  $('#mhShare').onclick = () => shareText('My Ramadan', `🌙 My Ramadan ${R.year} with Iqra\n${finished ? 'Ramadan complete' : 'Day ' + todayNo + ' of ' + len}\n✓ ${kept} fasts kept · 🕌 ${tar} Taraweeh nights\n📖 ${Math.min(30, paras)} / 30 paras of Quran\n🍲 ${charity} days of charity\n\n"Whoever fasts Ramadan with faith and hoping for reward, his previous sins are forgiven." (Bukhari 38)` + footer(APP_URL + '#rtracker'));
+}
+function wireRmRem(startKey, len) {
+  const b = $('#rmRem'); if (!b) return;
+  b.onclick = () => {
+    const [y, m, d] = startKey.split('-').map(Number);
+    let first = new Date(y, m - 1, d, 22, 30), count = len;
+    while (first < new Date() && count > 1) { first = new Date(first.getFullYear(), first.getMonth(), first.getDate() + 1, 22, 30); count--; }
+    downloadICS('iqra-ramadan-check.ics', [{ start: first, title: '🌙 Ramadan check · রমজানের হিসাব', desc: 'Two minutes to tick off today: fast, prayers, Taraweeh, Quran, charity. Open Iqra → Ramadan.', rrule: `FREQ=DAILY;COUNT=${count}`, before: 0, mins: 10 }]);
+    toast('Tap "Add All" to save · ক্যালেন্ডারে যোগ করুন');
+  };
+}
+
 /* ---------- Hadith: Sahih al-Bukhari (open Hadith API by Fawaz Ahmed) ---------- */
 const HAPI = 'https://cdn.jsdelivr.net/gh/fawazahmed0/hadith-api@1/editions/';
 // Fallback labels for the 97 books; the title stored in the hadith data is shown once a book has loaded.
@@ -1611,6 +1738,7 @@ function renderRamadan() {
       <div style="font-size:1.15em">in ${startIn} days · <span class="bn">আর ${bnNum(startIn)} দিন</span></div>
       <div style="margin-top:6px">Eid al-Fitr expected ${esc(longDate(R.eid.date))}</div></div>`;
     }
+    h += `<button class="card continue mhentry" data-go-rtracker><span><b>🌙 Ramadan 30-day check · <span class="bn">রমজানের ৩০ দিনের চেকলিস্ট</span></b><br><span class="muted">Fasting, Taraweeh, Quran khatm, last ten nights &amp; charity</span></span><span style="font-size:1.6em">›</span></button>`;
     h += `<p class="note">Dates follow the Umm al-Qura calendar. The real start depends on moon sighting in your country, so it may be one day different. The first Taraweeh is prayed the night before the first fast.<br><span class="bn">চাঁদ দেখার উপর নির্ভর করে তারিখ এক দিন আগে-পরে হতে পারে।</span></p>`;
     h += `<h2>Sehri &amp; Iftar timetable · <span class="bn">সময়সূচি</span></h2>
       <div class="card loc"><div><div class="place">${esc(place.city)}</div><div class="muted">${esc(place.country)}</div></div><button class="btn ghost" id="rchg">Change · <span class="bn">বদলান</span></button></div>
@@ -1633,6 +1761,7 @@ function renderRamadan() {
   $('#view').innerHTML = h;
   if (R) { $('#view').querySelector('.linkbtns').insertAdjacentHTML('beforebegin', remindersCard('ramadan')); wireReminders(place, o); }
   if ($('#rchg')) $('#rchg').onclick = () => { openPlacePicker(); };
+  if ($('[data-go-rtracker]')) $('[data-go-rtracker]').onclick = () => go('rtracker');
   { const anchor = $('#view').querySelector('.rhero + .note, .rhero ~ .twin + .note') || $('#view').querySelector('.note'); if (anchor) anchor.after($('#learn'), $('#rcatbox')); }
   wireRamadanCats();
   $('#view').querySelectorAll('[data-go]').forEach(b => b.onclick = () => b.dataset.go === 'q' ? go('reader', { juz: +b.dataset.j, s: +b.dataset.s, a: +b.dataset.a }) : go('book', { n: +b.dataset.n }));
@@ -1640,7 +1769,7 @@ function renderRamadan() {
 
 /* ---------- wiring ---------- */
 document.querySelectorAll('#tabs button').forEach(b => b.onclick = () => go(b.dataset.tab));
-$('#backBtn').onclick = () => go(state.view === 'book' ? 'hadith' : 'quran');
+$('#backBtn').onclick = () => go(state.view === 'book' ? 'hadith' : state.view === 'rtracker' ? 'ramadan' : 'quran');
 $('#focusBtn').onclick = toggleFocus;
 $('#prevV').onclick = () => setFocus(state.focusIdx - 1);
 $('#nextV').onclick = () => setFocus(state.focusIdx + 1);
@@ -1662,7 +1791,7 @@ applySettings();
   if (m && +m[1] >= 1 && +m[1] <= 30) go('reader', { juz: +m[1] });
   else if (/^surah-\d+$/.test(h) && +h.split('-')[1] >= 1 && +h.split('-')[1] <= 114) go('reader', { surah: +h.split('-')[1] });
   else if (/^bukhari-\d+$/.test(h)) go('book', { n: +h.split('-')[1] });
-  else if (['prayer', 'settings', 'hadith', 'ramadan', 'tracker'].includes(h)) go(h);
+  else if (['prayer', 'settings', 'hadith', 'ramadan', 'tracker', 'rtracker'].includes(h)) go(h);
   else go('quran');
 })();
 if ('serviceWorker' in navigator && location.protocol.startsWith('http')) navigator.serviceWorker.register('sw.js').catch(() => {});

@@ -27,6 +27,9 @@ Short, authentic lessons in English and Bangla, each with its source (hadith lin
 ## Daily check · আত্মসমালোচনা (30 days)
 A private 30-day self-review (muhasaba). Each day: the five prayers (on time / late / missed), total rakats, Quran, hadith, sunnah prayers, adhkar, charity, kindness to family, guarding the tongue, one good deed, one thing you're grateful for and one thing to improve tomorrow. You get a daily score, a 30-day colour calendar, a streak, progress stats, a daily evening reminder and a Share button. Everything stays on your phone.
 
+## Ramadan 30-day check · রমজানের ৩০ দিন
+Opens on the first day of Ramadan: today's fast (fasted / excused / missed, with make-up days counted), five prayers, sehri, Taraweeh, Quran khatm progress (paras), iftar dua, charity or feeding someone iftar, guarding the tongue, and in the last ten nights, night prayer and the Laylatul Qadr dua, with odd nights marked 🌙. Fitrana reminder from day 25. You can shift the start by a day to match moon sighting in your country.
+
 ## Reminders
 Add alerts for the five daily prayers, sehri and iftar in Ramadan, and a weekly Friday reminder to read Surah Al-Kahf. They go into your iPhone Calendar, so they ring even when the app is closed.
 
