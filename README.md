@@ -1,6 +1,8 @@
-# Path of Guidance · হেদায়েতের পথ
+# Iqra · ইকরা
 
-Path of Guidance is a free Islamic app for iPhone. It was made so that everyone can read and learn about their deen with comfort, including people with dyslexia and other reading difficulties.
+*Iqra (اقرأ) means "Read" — the first word revealed in the Quran.*
+
+Iqra is a free Islamic app for iPhone. It was made so that everyone can read and learn about their deen with comfort, including people with dyslexia and other reading difficulties.
 
 **Open the app:** https://rahimachy26.github.io/Path-of-Guidance/
 

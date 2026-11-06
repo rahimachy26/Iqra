@@ -3,11 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Path of Guidance · হেদায়েতের পথ</title>
+<title>Iqra · ইকরা</title>
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="Path of Guidance">
+<meta name="apple-mobile-web-app-title" content="Iqra">
 <meta name="theme-color" content="#FBF6E9">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-180.png">
@@ -658,7 +658,7 @@ async function renderList() {
   setTop({ title: 'Quran · <span class="bn">কুরআন</span>', sub: '১১৪ সূরা · ৩০ পারা · আরবি ও বাংলা অনুবাদ' });
   const last = store.get('last', null);
   const tab = store.get('qtab', 'surah');
-  let h = `<div class="card" style="text-align:center;background:var(--accent-soft)"><div style="font-size:1.35em;font-weight:600;color:var(--accent)">Path of Guidance</div><div class="bn" style="font-size:1.15em">হেদায়েতের পথ</div></div>`;
+  let h = `<div class="card" style="text-align:center;background:var(--accent-soft)"><div style="font-size:1.6em;font-weight:600;color:var(--accent);letter-spacing:.04em">Iqra · <span class="bn">ইকরা</span></div><div class="muted">Read · <span class="bn">পড়ো</span></div></div>`;
   if (last) {
     const label = last.surah ? `Surah ${last.s}. ${esc(SURAHS[last.s - 1].en)} · <span class="bn">${esc(SURAHS[last.s - 1].bn)}</span>` : `Para ${last.juz} · <span class="bn">পারা ${bnNum(last.juz)}</span>`;
     h += `<button class="card continue" id="cont"><span><b>Continue reading</b> · <span class="bn">পড়া চালিয়ে যান</span><br>${label}<br><span class="muted">Ayah ${last.s}:${last.a}</span></span><span style="font-size:1.6em">›</span></button>`;
@@ -1051,9 +1051,9 @@ function icsFold(line) {
 }
 function buildICS(events) {
   const now = icsDate(new Date());
-  const L = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Path of Guidance//EN', 'CALSCALE:GREGORIAN', 'METHOD:PUBLISH', 'X-WR-CALNAME:Path of Guidance'];
+  const L = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Iqra//EN', 'CALSCALE:GREGORIAN', 'METHOD:PUBLISH', 'X-WR-CALNAME:Iqra'];
   events.forEach((e, i) => {
-    L.push('BEGIN:VEVENT', `UID:pog-${e.start.getTime()}-${i}-${Math.random().toString(36).slice(2, 8)}@path-of-guidance`, `DTSTAMP:${now}`,
+    L.push('BEGIN:VEVENT', `UID:pog-${e.start.getTime()}-${i}-${Math.random().toString(36).slice(2, 8)}@iqra-app`, `DTSTAMP:${now}`,
       `DTSTART:${icsDate(e.start)}`, `DTEND:${icsDate(new Date(e.start.getTime() + (e.mins || 10) * 60000))}`,
       `SUMMARY:${icsEsc(e.title)}`, `DESCRIPTION:${icsEsc(e.desc || '')}`);
     if (e.location) L.push(`LOCATION:${icsEsc(e.location)}`);
@@ -1074,7 +1074,7 @@ function prayerEvents(place, o, days, before, which) {
   const today = PT.localYMD(place.tz), ev = [];
   for (let i = 0; i < days; i++) {
     const d = addDays(today, i), t = PT.forDate(d.y, d.m, d.d, place, o);
-    for (const k of which) if (t[k] && t[k] > new Date()) ev.push({ start: t[k], title: `🕌 ${PRAYER_NAMES[k]}`, desc: `Prayer time in ${place.city} — Path of Guidance`, location: `${place.city}, ${place.country}`, before });
+    for (const k of which) if (t[k] && t[k] > new Date()) ev.push({ start: t[k], title: `🕌 ${PRAYER_NAMES[k]}`, desc: `Prayer time in ${place.city} — Iqra`, location: `${place.city}, ${place.country}`, before });
   }
   return ev;
 }
@@ -1082,8 +1082,8 @@ function ramadanEvents(place, o, R, before) {
   const ev = [];
   for (const x of R.days) {
     const d = x.date, t = PT.forDate(d.getUTCFullYear(), d.getUTCMonth() + 1, d.getUTCDate(), place, o);
-    if (t.fajr && t.fajr > new Date()) ev.push({ start: t.fajr, title: '🌙 Sehri ends · সেহরির শেষ সময়', desc: `Stop eating by Fajr. ${place.city} — Path of Guidance`, location: `${place.city}, ${place.country}`, before: Math.max(before, 30) });
-    if (t.maghrib && t.maghrib > new Date()) ev.push({ start: t.maghrib, title: '🌅 Iftar · ইফতার', desc: `Time to open your fast. ${place.city} — Path of Guidance`, location: `${place.city}, ${place.country}`, before });
+    if (t.fajr && t.fajr > new Date()) ev.push({ start: t.fajr, title: '🌙 Sehri ends · সেহরির শেষ সময়', desc: `Stop eating by Fajr. ${place.city} — Iqra`, location: `${place.city}, ${place.country}`, before: Math.max(before, 30) });
+    if (t.maghrib && t.maghrib > new Date()) ev.push({ start: t.maghrib, title: '🌅 Iftar · ইফতার', desc: `Time to open your fast. ${place.city} — Iqra`, location: `${place.city}, ${place.country}`, before });
   }
   return ev;
 }
@@ -1097,7 +1097,7 @@ function kahfEvent(place, hour) {
   const p = new Intl.DateTimeFormat('en-GB', { timeZone: place.tz, year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric', hourCycle: 'h23' }).formatToParts(new Date(guess));
   const g = t => +p.find(x => x.type === t).value;
   const off = Date.UTC(g('year'), g('month') - 1, g('day'), g('hour'), g('minute')) - guess;
-  return { start: new Date(guess - off), title: '📖 Read Surah Al-Kahf · সূরা কাহফ', desc: 'Friday reminder: a light between the two Fridays. Open Path of Guidance → Quran → Al-Kahf.', rrule: 'FREQ=WEEKLY;BYDAY=FR', before: 0, mins: 30 };
+  return { start: new Date(guess - off), title: '📖 Read Surah Al-Kahf · সূরা কাহফ', desc: 'Friday reminder: a light between the two Fridays. Open Iqra → Quran → Al-Kahf.', rrule: 'FREQ=WEEKLY;BYDAY=FR', before: 0, mins: 30 };
 }
 function remindersCard(context) {
   const ram = context === 'ramadan';
@@ -1123,7 +1123,7 @@ function wireReminders(place, o) {
     if (g('rR').checked) { const R = ramadanPeriod(PT.localYMD(place.tz)); if (R) ev = ev.concat(ramadanEvents(place, o, R, before)); }
     if (g('rK').checked) ev.push(kahfEvent(place, 10));
     if (!ev.length) { g('rMsg').textContent = 'Choose at least one reminder first.'; return; }
-    downloadICS('path-of-guidance-reminders.ics', ev);
+    downloadICS('iqra-reminders.ics', ev);
     g('rMsg').innerHTML = `${ev.length} reminders ready. If nothing opens, open this app in <b>Safari</b> and try again.`;
   };
 }
