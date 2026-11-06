@@ -756,6 +756,8 @@ function shareApp() {
   shareText('Iqra – Quran & Sunnah', 'Iqra – কুরআন ও সুন্নাহ 📖\nThe Quran in Arabic with Bangla translation, Sahih al-Bukhari, prayer times and a Ramadan guide. Easy to read and dyslexia-friendly. Free.\n\n' + APP_URL);
 }
 document.addEventListener('click', e => {
+  const ab = e.target.closest('[data-about]');
+  if (ab) { e.preventDefault(); go('settings'); let n = 0; (function f() { const t = document.getElementById('about'); if (t) scrollToEl(t); else if (n++ < 40) setTimeout(f, 50); })(); return; }
   const b = e.target.closest('[data-share]');
   if (!b) return;
   e.stopPropagation(); e.preventDefault();
@@ -791,7 +793,7 @@ async function renderList() {
   setTop({ title: 'Quran · <span class="bn">কুরআন</span>', sub: '১১৪ সূরা · ৩০ পারা · আরবি ও বাংলা অনুবাদ' });
   const last = store.get('last', null);
   const tab = store.get('qtab', 'surah');
-  let h = `<div class="card brandcard"><img src="icon-192.png" alt="Iqra logo" width="76" height="76"><div><div class="bname">Iqra</div><div class="muted">Quran &amp; Sunnah<br><span class="bn">কুরআন ও সুন্নাহ</span></div></div></div><button class="btn sharehome" data-share="app" aria-label="Share the Iqra app">${SHARE_ICON}<span>Share Iqra · <span class="bn">অ্যাপ শেয়ার করুন</span></span></button>${mhEntry()}`;
+  let h = `<div class="card brandcard"><img src="icon-192.png" alt="Iqra logo" width="76" height="76"><div><div class="bname">Iqra</div><div class="muted">Quran &amp; Sunnah<br><span class="bn">কুরআন ও সুন্নাহ</span></div><a href="#settings" data-about style="font-size:.85em;color:var(--accent);font-weight:600">About Iqra · <span class="bn">আমাদের কথা</span></a></div></div><button class="btn sharehome" data-share="app" aria-label="Share the Iqra app">${SHARE_ICON}<span>Share Iqra · <span class="bn">অ্যাপ শেয়ার করুন</span></span></button>${mhEntry()}`;
   if (last) {
     const label = last.surah ? `Surah ${last.s}. ${esc(SURAHS[last.s - 1].en)} · <span class="bn">${esc(SURAHS[last.s - 1].bn)}</span>` : `Para ${last.juz} · <span class="bn">পারা ${bnNum(last.juz)}</span>`;
     h += `<button class="card continue" id="cont"><span><b>Continue reading</b> · <span class="bn">পড়া চালিয়ে যান</span><br>${label}<br><span class="muted">Ayah ${last.s}:${last.a}</span></span><span style="font-size:1.6em">›</span></button>`;
@@ -1206,6 +1208,17 @@ async function renderSettings() {
   </div>
   <h2>Share Iqra · <span class="bn">শেয়ার করুন</span></h2>
   <div class="card"><p style="margin-top:0">Send the Iqra app to family and friends.<br><span class="bn">পরিবার ও বন্ধুদের সাথে অ্যাপটি শেয়ার করুন।</span></p><button class="btn" data-share="app" style="width:100%">Share the app · <span class="bn">অ্যাপ শেয়ার করুন</span></button></div>
+  <h2 id="about" style="scroll-margin-top:calc(110px + var(--safe-top))">About Iqra · <span class="bn">আমাদের কথা</span></h2>
+  <div class="card about">
+    <p style="margin-top:0">Iqra was made by <b>Rahima Chowdhury</b> as a <b>sadaqah jariyah</b>, a gift for the Akhirah. It is free, with no adverts, and it always will be.</p>
+    <p>For as long as people read the Quran, learn a hadith or pray on time with this app, I pray that Allah accepts it from me. Please remember me in your duas.</p>
+    <p class="bn">Iqra অ্যাপটি আমি, <b>রাহিমা চৌধুরী</b>, আখিরাতের জন্য সাদাকায়ে জারিয়া হিসেবে রেখে গেলাম। এটি সম্পূর্ণ ফ্রি, কোনো বিজ্ঞাপন নেই, আর সবসময় এমনই থাকবে।</p>
+    <p class="bn">যতদিন মানুষ এই অ্যাপ দিয়ে কুরআন পড়বে, হাদিস শিখবে, সময়মতো নামাজ পড়বে, আল্লাহ যেন আমার এই আমল কবুল করেন। আপনাদের দোয়ায় আমাকে স্মরণ রাখবেন।</p>
+    <div class="ar" lang="ar" dir="rtl" style="text-align:center;margin:14px 0 4px">رَبَّنَا تَقَبَّلْ مِنَّا إِنَّكَ أَنتَ السَّمِيعُ الْعَلِيمُ</div>
+    <p style="text-align:center;margin-top:0">“Our Lord, accept this from us. You are the All-Hearing, the All-Knowing.” (Al-Baqarah 2:127)<br><span class="bn">“হে আমাদের রব, আমাদের পক্ষ থেকে কবুল করুন। নিশ্চয়ই আপনি সর্বশ্রোতা, সর্বজ্ঞ।”</span></p>
+    <p class="note">The Prophet ﷺ said: “When a person dies, all their deeds end except three: ongoing charity (sadaqah jariyah), knowledge that benefits others, or a righteous child who prays for them.”<br><span class="bn">রাসূলুল্লাহ ﷺ বলেছেন: “মানুষ মারা গেলে তার সব আমল বন্ধ হয়ে যায়, তিনটি ছাড়া: সাদাকায়ে জারিয়া, এমন জ্ঞান যা থেকে মানুষ উপকৃত হয়, অথবা নেক সন্তান যে তার জন্য দোয়া করে।”</span><br>📚 <a href="https://sunnah.com/muslim:1631" target="_blank" rel="noopener">Sahih Muslim 1631</a></p>
+    <button class="btn" data-share="app" style="width:100%">Share Iqra, share the reward · <span class="bn">শেয়ার করে সওয়াবের অংশীদার হোন</span></button>
+  </div>
   <div class="card"><a href="privacy.html">Privacy policy · <span class="bn">গোপনীয়তা নীতি</span></a> — Iqra collects no personal data. <span class="bn">Iqra কোনো ব্যক্তিগত তথ্য নেয় না।</span></div>
   <h2>Add to iPhone home screen</h2>
   <div class="card note">In Safari, tap the Share button, then <b>Add to Home Screen</b>. The app then opens full screen with its own icon.<br><span class="bn">Safari-তে Share বোতাম চাপুন, তারপর “Add to Home Screen” বেছে নিন।</span></div>
