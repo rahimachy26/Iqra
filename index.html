@@ -139,8 +139,14 @@ details.info .bn{line-height:var(--lh)}
 .linkbtns .btn{text-align:left}
 tr.today td{background:var(--accent-soft)}
 
+/* share */
+.sharebtn{float:right;display:inline-flex;align-items:center;gap:6px;border:2px solid var(--line);background:var(--bg);color:var(--accent);border-radius:999px;padding:4px 12px;min-height:40px;font-size:.8em;font-weight:600}
+.sharebtn svg{width:18px;height:18px}
+.toast{position:fixed;left:50%;bottom:calc(96px + var(--safe-bot));transform:translateX(-50%);background:var(--fg);color:var(--bg);padding:12px 18px;border-radius:14px;z-index:60;font-size:.9em;max-width:90vw;text-align:center;box-shadow:0 6px 18px rgba(0,0,0,.25)}
 /* brand */
-.brandcard{display:flex;align-items:center;gap:16px;background:var(--accent-soft)}
+.brandcard{display:flex;align-items:center;gap:16px;background:var(--accent-soft);margin-bottom:10px}
+.sharehome{width:100%;display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:14px}
+.sharehome svg{width:22px;height:22px}
 .brandcard img{border-radius:18px;box-shadow:0 3px 10px rgba(0,0,0,.18);flex:none}
 .brandcard .bname{font-family:'Lexend',serif;font-size:1.9em;font-weight:600;color:var(--accent);line-height:1.1;letter-spacing:.03em}
 /* surah list & benefits */
@@ -649,6 +655,39 @@ function go(view, arg) {
   try { history.replaceState(null, '', '#' + hash); } catch (e) {}
 }
 
+/* ---------- Sharing (iPhone/Android share sheet, or copy as a fallback) ---------- */
+const APP_URL = 'https://rahimachy26.github.io/Iqra/';
+const SHARE_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M7 8l5-5 5 5"/><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/></svg>';
+const shareBtn = (label = 'Share') => `<button class="sharebtn" data-share aria-label="Share">${SHARE_ICON}<span>${label}</span></button>`;
+function toast(msg) { const t = document.createElement('div'); t.className = 'toast'; t.textContent = msg; document.body.appendChild(t); setTimeout(() => t.remove(), 2600); }
+async function shareText(title, text) {
+  try { if (navigator.share) { await navigator.share({ title, text }); return; } }
+  catch (e) { if (e && e.name === 'AbortError') return; }
+  try { await navigator.clipboard.writeText(text); toast('Copied — paste it into WhatsApp, Messages or anywhere · কপি হয়েছে'); }
+  catch (e) { toast('Sharing is not available here'); }
+}
+const footer = link => `\n\n— Shared from Iqra · কুরআন ও সুন্নাহ\n${link}`;
+function shareApp() {
+  shareText('Iqra – Quran & Sunnah', 'Iqra – কুরআন ও সুন্নাহ 📖\nThe Quran in Arabic with Bangla translation, Sahih al-Bukhari, prayer times and a Ramadan guide. Easy to read and dyslexia-friendly. Free.\n\n' + APP_URL);
+}
+document.addEventListener('click', e => {
+  const b = e.target.closest('[data-share]');
+  if (!b) return;
+  e.stopPropagation(); e.preventDefault();
+  if (b.dataset.share === 'app') return shareApp();
+  if (b.dataset.share === 'prayer') return sharePrayer();
+  const card = b.closest('.verse'); if (!card) return;
+  const txt = sel => { const el = card.querySelector(sel); return el ? el.textContent.trim() : ''; };
+  if (card.dataset.h) {
+    const parts = [txt('.ar'), txt('.tx.en'), txt('.tx.bnt')].filter(Boolean);
+    shareText('Hadith', parts.join('\n\n') + `\n\n— Sahih al-Bukhari ${card.dataset.h}` + footer(APP_URL + '#bukhari-' + card.dataset.book));
+  } else {
+    const sm = SURAHS[+card.dataset.s - 1];
+    const parts = [txt('.ar'), txt('.tr')].filter(Boolean);
+    shareText('Quran ' + card.dataset.s + ':' + card.dataset.a, parts.join('\n\n') + `\n\n— Surah ${sm.en} (${sm.bn}) ${card.dataset.s}:${card.dataset.a}` + footer(APP_URL + '#surah-' + card.dataset.s));
+  }
+}, true);
+
 /* ---------- Quran list: search, 114 surahs, 30 paras, favourites ---------- */
 const norm = t => String(t).toLowerCase().normalize('NFKD').replace(/[^a-z0-9ঀ-৿]/g, '').replace(/^(al|an|ar|as|at|ad|adh|az|ash)(?=[a-z]{3})/, '');
 function surahRow(m) {
@@ -662,7 +701,7 @@ async function renderList() {
   setTop({ title: 'Quran · <span class="bn">কুরআন</span>', sub: '১১৪ সূরা · ৩০ পারা · আরবি ও বাংলা অনুবাদ' });
   const last = store.get('last', null);
   const tab = store.get('qtab', 'surah');
-  let h = `<div class="card brandcard"><img src="icon-192.png" alt="Iqra logo" width="76" height="76"><div><div class="bname">Iqra</div><div class="muted">Quran &amp; Sunnah<br><span class="bn">কুরআন ও সুন্নাহ</span></div></div></div>`;
+  let h = `<div class="card brandcard"><img src="icon-192.png" alt="Iqra logo" width="76" height="76"><div><div class="bname">Iqra</div><div class="muted">Quran &amp; Sunnah<br><span class="bn">কুরআন ও সুন্নাহ</span></div></div></div><button class="btn sharehome" data-share="app" aria-label="Share the Iqra app">${SHARE_ICON}<span>Share Iqra · <span class="bn">অ্যাপ শেয়ার করুন</span></span></button>`;
   if (last) {
     const label = last.surah ? `Surah ${last.s}. ${esc(SURAHS[last.s - 1].en)} · <span class="bn">${esc(SURAHS[last.s - 1].bn)}</span>` : `Para ${last.juz} · <span class="bn">পারা ${bnNum(last.juz)}</span>`;
     h += `<button class="card continue" id="cont"><span><b>Continue reading</b> · <span class="bn">পড়া চালিয়ে যান</span><br>${label}<br><span class="muted">Ayah ${last.s}:${last.a}</span></span><span style="font-size:1.6em">›</span></button>`;
@@ -751,7 +790,7 @@ async function renderReader({ juz, surah, id, s: jumpS, a: jumpA }) {
     const [bism, rest] = splitBism(v);
     if (bism && S.showAr) h += `<div class="bism" lang="ar">${esc(bism)}</div>`;
     h += `<article class="verse" id="v${v.id}" data-id="${v.id}" data-s="${v.s}" data-a="${v.a}">
-      <span class="ref">${v.s}:${v.a}</span>${v.sajda ? '<span class="sajda">۩ Sajdah · সিজদা</span>' : ''}
+      ${shareBtn()}<span class="ref">${v.s}:${v.a}</span>${v.sajda ? '<span class="sajda">۩ Sajdah · সিজদা</span>' : ''}
       ${S.showAr ? `<div class="ar" lang="ar">${esc(rest)}</div>` : ''}
       ${S.showBn ? `<div class="tr" lang="bn">${esc(v.bn)}</div>` : ''}
     </article>`;
@@ -890,6 +929,7 @@ function renderPrayer() {
     <div style="font-size:1.2em">${nextToday ? '' : 'Tomorrow · '}${fmt(nextTime, tz)} — in ${left}</div></div>
   <ul class="ptimes">${PRAYERS.map(([k, en, bn]) => `<li class="${k === 'sunrise' ? 'sun' : ''} ${nextToday && k === nextKey ? 'is-next' : ''}">
     <span class="nm"><b>${en}</b> · <span class="bn">${bn}</span>${k === 'sunrise' ? '<small>End of Fajr time · ফজরের শেষ সময়</small>' : ''}</span><span class="t">${fmt(times[k], tz)}</span></li>`).join('')}</ul>
+  <button class="btn ghost" data-share="prayer" style="width:100%;margin-bottom:6px">${SHARE_ICON.replace('<svg', '<svg width="20" height="20" style="vertical-align:-4px"')} Share today's times · <span class="bn">আজকের সময় শেয়ার করুন</span></button>
   <h2>Next 7 days · <span class="bn">আগামী ৭ দিন</span></h2>
   <div class="weekwrap"><table class="week"><tr><th></th><th>Fajr</th><th>Sunrise</th><th>Dhuhr</th><th>Asr</th><th>Maghrib</th><th>Isha</th></tr>
   ${week.map(({ dd, t }) => `<tr><td>${dayName(dd)}</td>${PRAYERS.map(([k]) => `<td>${fmt(t[k], tz)}</td>`).join('')}</tr>`).join('')}</table></div>
@@ -917,6 +957,13 @@ function renderPrayer() {
 }
 
 function refreshPlaceView() { state.view === 'ramadan' ? renderRamadan() : renderPrayer(); }
+function sharePrayer() {
+  const place = currentPlace(), o = opts(place), tz = place.tz, d = PT.localYMD(tz);
+  const t = PT.forDate(d.y, d.m, d.d, place, o);
+  const date = new Intl.DateTimeFormat('en-GB', { weekday: 'long', day: 'numeric', month: 'long', timeZone: tz }).format(new Date());
+  const lines = PRAYERS.map(([k, en, bn]) => `${en} (${bn}): ${fmt(t[k], tz)}`).join('\n');
+  shareText('Prayer times', `🕌 Prayer times · নামাজের সময়\n${place.city}, ${place.country} — ${date}\n\n${lines}` + footer(APP_URL + '#prayer'));
+}
 function openPlacePicker() {
   const countries = new Set(PLACES.map(p => p.country)).size;
   openSheet(`
@@ -963,6 +1010,8 @@ async function renderSettings() {
     <div class="progress"><div id="bar" style="width:${have / 30 * 100}%"></div></div>
     <p class="note" id="dlMsg"></p>
   </div>
+  <h2>Share Iqra · <span class="bn">শেয়ার করুন</span></h2>
+  <div class="card"><p style="margin-top:0">Send the Iqra app to family and friends.<br><span class="bn">পরিবার ও বন্ধুদের সাথে অ্যাপটি শেয়ার করুন।</span></p><button class="btn" data-share="app" style="width:100%">Share the app · <span class="bn">অ্যাপ শেয়ার করুন</span></button></div>
   <h2>Add to iPhone home screen</h2>
   <div class="card note">In Safari, tap the Share button, then <b>Add to Home Screen</b>. The app then opens full screen with its own icon.<br><span class="bn">Safari-তে Share বোতাম চাপুন, তারপর “Add to Home Screen” বেছে নিন।</span></div>
   <div class="card note">Arabic text: Uthmani script. Bangla translation and Arabic text are downloaded from the Al-Quran Cloud API (alquran.cloud). Prayer times are calculated on your device. Surah benefits use only authentic narrations (Bukhari, Muslim, or graded sahih/hasan), with references linked to sunnah.com. Sahih al-Bukhari (Arabic, English by Muhsin Khan, and Bangla) is downloaded from the open Hadith API by Fawaz Ahmed (github.com/fawazahmed0/hadith-api).</div>`;
@@ -1200,7 +1249,7 @@ async function renderBook({ n }) {
   let h = `<div class="surah-head"><div class="en">Sahih al-Bukhari · Book ${n}</div><div>${esc(data.title)}</div><div class="muted">${data.items.length} hadiths · <span class="bn">${bnNum(data.items.length)}টি হাদিস</span></div></div>`;
   if (!data.complete) h += `<div class="card note">Some languages could not be downloaded just now. Open this book again later to get all three.</div>`;
   for (const it of data.items) {
-    h += `<article class="verse"><span class="ref">Hadith ${it.n}</span>
+    h += `<article class="verse" data-h="${it.n}" data-book="${n}">${shareBtn()}<span class="ref">Hadith ${it.n}</span>
       ${S.showAr && it.ar ? `<div class="ar" lang="ar" style="font-size:calc(1.45em * var(--ar-mult,1))">${esc(it.ar)}</div>` : ''}
       ${S.showEn && it.en ? `<span class="lang">ENGLISH</span><div class="tx en" lang="en">${esc(it.en)}</div>` : ''}
       ${S.showBn && it.bn ? `<span class="lang bn">বাংলা</span><div class="tx bnt" lang="bn">${esc(it.bn)}</div>` : ''}
