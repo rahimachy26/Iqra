@@ -1,8 +1,15 @@
-[{
-      "relation": ["delegate_permission/common.handle_all_urls"],
-      "target": {
-        "namespace": "android_app",
-        "package_name": "io.github.rahimachy26.iqra",
-        "sha256_cert_fingerprints": ["AD:1C:16:1C:48:2A:E1:C8:B2:CC:93:34:D1:97:78:57:E6:78:30:5A:CC:1F:EE:79:A6:11:94:1E:DC:81:D2:A8"]
-      }
-    }]
+[
+  {
+    "relation": [
+      "delegate_permission/common.handle_all_urls"
+    ],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "io.github.rahimachy26.iqra",
+      "sha256_cert_fingerprints": [
+        "AD:1C:16:1C:48:2A:E1:C8:B2:CC:93:34:D1:97:78:57:E6:78:30:5A:CC:1F:EE:79:A6:11:94:1E:DC:81:D2:A8",
+        "AA:A5:5E:1F:DC:21:44:1D:15:FB:04:4A:C9:6E:CA:4A:24:52:66:46:E9:CC:51:19:66:AB:73:0E:A2:BA:56:F1"
+      ]
+    }
+  }
+]
